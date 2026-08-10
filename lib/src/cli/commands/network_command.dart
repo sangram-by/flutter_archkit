@@ -57,6 +57,7 @@ class NetworkCommand extends Command<int> {
       progress.complete('Network module generated successfully!');
 
       logger.info('\nFiles generated:');
+      logger.info('  - lib/core/constants/api_urls.dart');
       logger.info('  - lib/core/util/api_response.dart');
       logger.info('  - lib/core/util/typedefs.dart');
       logger.info('  - lib/core/network/api_exception.dart');
@@ -69,7 +70,8 @@ class NetworkCommand extends Command<int> {
       logger.info('\nDependencies updated:');
       logger.info('  - dio: ^5.4.3 added to pubspec.yaml');
 
-      logger.info('\n${lightGreen.wrap('✔')} Done! Run "flutter pub get" to update dependencies.');
+      logger.info(
+          '\n${lightGreen.wrap('✔')} Done! Run "flutter pub get" to update dependencies.');
       return ExitCode.success.code;
     } catch (e) {
       progress.fail('Failed to generate network module: $e');

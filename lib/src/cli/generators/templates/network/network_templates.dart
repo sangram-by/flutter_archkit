@@ -367,9 +367,15 @@ import 'api_interface.dart';
 import 'dio_services.dart';
 
 class DioNetwork implements ApiInterface {
-  final DioService _dioService;
+    static final DioNetwork _instance = DioNetwork._internal();
 
-  DioNetwork({required DioService dioService}) : _dioService = dioService;
+  factory DioNetwork() {
+    return _instance;
+  }
+
+  DioNetwork._internal();
+
+  final DioService _dioService = DioService(dioClient: getDio());
 
   @override
   void cancelRequests({CancelToken? cancelToken}) {
@@ -564,13 +570,14 @@ class DioNetwork implements ApiInterface {
     return '''
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:$packageName/core/constants/api_urls.dart';
 import 'package:$packageName/core/network/interceptors/api_interceptor.dart';
 import 'package:$packageName/core/network/interceptors/logging.dart';
 
 Dio getDio({String? baseUrl}) {
   Dio dio = Dio(
     BaseOptions(
-      baseUrl: baseUrl ?? '',
+      baseUrl: baseUrl ?? ApiUrls.baseUrl,
       connectTimeout: const Duration(seconds: 90),
       receiveTimeout: const Duration(seconds: 90),
       responseType: ResponseType.json,
@@ -649,4 +656,14 @@ class Logging extends Interceptor {
 }
 ''';
   }
+
+  static String apiUrlsTemplate() {
+    return '''
+class ApiUrls {
+  // TODO: Add your base URL implementation here
+  static const String baseUrl = 'https://api.example.com';
 }
+''';
+  }
+}
+

@@ -29,7 +29,8 @@ dependencies:
       final generator = NetworkGenerator();
       await generator.generate(tempDir.path);
 
-      final apiResponseFile = File(p.join(tempDir.path, 'lib', 'core', 'util', 'api_response.dart'));
+      final apiResponseFile = File(
+          p.join(tempDir.path, 'lib', 'core', 'util', 'api_response.dart'));
       expect(apiResponseFile.existsSync(), isTrue);
 
       final content = apiResponseFile.readAsStringSync();
@@ -38,9 +39,18 @@ dependencies:
       expect(content, isNot(contains('showLoader()')));
       expect(content, isNot(contains('hideLoader()')));
 
-      final dioNetworkFile = File(p.join(tempDir.path, 'lib', 'core', 'network', 'dio_network.dart'));
+      final apiUrlsFile = File(
+          p.join(tempDir.path, 'lib', 'core', 'constants', 'api_urls.dart'));
+      expect(apiUrlsFile.existsSync(), isTrue);
+      expect(apiUrlsFile.readAsStringSync(), contains('class ApiUrls'));
+      expect(apiUrlsFile.readAsStringSync(),
+          contains('static const String baseUrl'));
+
+      final dioNetworkFile = File(
+          p.join(tempDir.path, 'lib', 'core', 'network', 'dio_network.dart'));
       expect(dioNetworkFile.existsSync(), isTrue);
-      expect(dioNetworkFile.readAsStringSync(), contains('package:test_app/core/util/api_response.dart'));
+      expect(dioNetworkFile.readAsStringSync(),
+          contains('package:test_app/core/util/api_response.dart'));
 
       final pubspecFile = File(p.join(tempDir.path, 'pubspec.yaml'));
       expect(pubspecFile.readAsStringSync(), contains('dio: ^5.4.3'));

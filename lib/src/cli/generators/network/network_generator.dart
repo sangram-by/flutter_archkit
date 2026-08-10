@@ -13,8 +13,16 @@ class NetworkGenerator {
     final packageName = _getPackageName(projectPath);
 
     final utilDir = p.join(projectPath, 'lib', 'core', 'util');
+    final constantsDir = p.join(projectPath, 'lib', 'core', 'constants');
     final networkDir = p.join(projectPath, 'lib', 'core', 'network');
     final interceptorsDir = p.join(networkDir, 'interceptors');
+
+    // 0. Write constants files
+    _writeFile(
+      p.join(constantsDir, 'api_urls.dart'),
+      NetworkTemplates.apiUrlsTemplate(),
+      override: override,
+    );
 
     // 1. Write util files
     _writeFile(
