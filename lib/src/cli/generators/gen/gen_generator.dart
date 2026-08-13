@@ -82,7 +82,7 @@ class ArchkitMetadata {
   }
 }
 
-class FeatureCodeGeneratorService {
+class GenGenerator {
   /// Scans presentation layer files under [targetPath] for methods annotated with `@Archkit`.
   /// Generates the corresponding cascading methods in Domain (UseCase, Repository) and Data (RepositoryImpl, RemoteDataSource, RemoteDataSourceImpl).
   Future<List<CodeGeneratorResult>> generateFeatureCode({
@@ -538,3 +538,5 @@ class FeatureCodeGeneratorService {
     return importStr + content;
   }
 }
+
+typedef FeatureCodeGeneratorService = GenGenerator;

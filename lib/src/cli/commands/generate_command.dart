@@ -3,7 +3,7 @@ import 'package:args/command_runner.dart';
 import 'package:interact/interact.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as p;
-import 'package:flutter_archkit/src/services/feature_code_generator_service.dart';
+import 'package:flutter_archkit/src/cli/generators/gen/gen_generator.dart';
 
 class GenerateCommand extends Command<int> {
   @override
@@ -16,10 +16,10 @@ class GenerateCommand extends Command<int> {
   String get description =>
       'Generate domain and data layer API methods for @Archkit annotated presentation handlers';
 
-  final FeatureCodeGeneratorService _codeGeneratorService;
+  final GenGenerator _codeGeneratorService;
 
-  GenerateCommand({FeatureCodeGeneratorService? codeGeneratorService})
-      : _codeGeneratorService = codeGeneratorService ?? FeatureCodeGeneratorService() {
+  GenerateCommand({GenGenerator? codeGeneratorService})
+      : _codeGeneratorService = codeGeneratorService ?? GenGenerator() {
     argParser
       ..addOption(
         'path',

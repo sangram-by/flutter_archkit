@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_archkit/src/services/feature_code_generator_service.dart';
+import 'package:flutter_archkit/src/cli/generators/gen/gen_generator.dart';
 import 'package:flutter_archkit/src/cli/commands/generate_command.dart';
 import 'package:path/path.dart' as p;
 
