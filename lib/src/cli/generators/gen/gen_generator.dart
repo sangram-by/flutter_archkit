@@ -83,8 +83,8 @@ class ArchkitMetadata {
 }
 
 class GenGenerator {
-  /// Scans presentation layer files under [targetPath] for methods annotated with `@Archkit`.
-  /// Generates the corresponding cascading methods in Domain (UseCase, Repository) and Data (RepositoryImpl, RemoteDataSource, RemoteDataSourceImpl).
+  /// Scans presentation/viewmodels/controllers layer files under [targetPath] for methods annotated with `@Archkit`.
+  /// Generates cascading methods for Clean (UseCase, Repository, DataSource), MVVM (Services), and MVC (Controllers, Providers).
   Future<List<CodeGeneratorResult>> generateFeatureCode({
     required String targetPath,
     bool dryRun = false,
@@ -102,27 +102,16 @@ class GenGenerator {
 
     final packageName = _detectPackageName(actualFeatureDir);
 
-    final presentationDir = Directory(p.join(actualFeatureDir, 'presentation'));
-    if (!presentationDir.existsSync()) {
-      return results;
-    }
-
-    final presentationFiles = presentationDir
-        .listSync(recursive: true)
-        .whereType<File>()
-        .where((f) => f.path.endsWith('.dart'))
-        .toList();
-
+    final List<File> candidateFiles = _collectCandidateFiles(actualFeatureDir);
     final methodsToGenerate = <String, ArchkitMetadata>{};
 
-    for (final file in presentationFiles) {
+    for (final file in candidateFiles) {
       final content = file.readAsStringSync();
       final lines = content.split('\n');
 
       for (int i = 0; i < lines.length; i++) {
         final line = lines[i].trim();
         if (line.contains('@Archkit') || line.contains('@archkit')) {
-          // Extract metadata parameters from @Archkit(...)
           final endpointMatch =
               RegExp(r'''endpoint\s*:\s*['"]([^'"]+)['"]''').firstMatch(line);
           final returnTypeMatch =
@@ -135,7 +124,6 @@ class GenGenerator {
           final customHttpMethod =
               (httpMethodMatch?.group(1) ?? 'GET').toUpperCase();
 
-          // Look at next non-annotation line for method signature
           int nextIdx = i + 1;
           while (
               nextIdx < lines.length && lines[nextIdx].trim().startsWith('@')) {
@@ -156,7 +144,7 @@ class GenGenerator {
                   bodyIdx++) {
                 final bodyLine = lines[bodyIdx];
                 final callMatch = RegExp(
-                        r'(?:useCase|[a-zA-Z_]\w*[uU]se[cC]ase)\.([a-zA-Z_]\w*)\s*\(([^)]*)\)')
+                        r'(?:useCase|[a-zA-Z_]\w*[uU]se[cC]ase|service|[a-zA-Z_]\w*[sS]ervice|provider|[a-zA-Z_]\w*[pP]rovider|repository|[a-zA-Z_]\w*[rR]epository)\.([a-zA-Z_]\w*)\s*\(([^)]*)\)')
                     .firstMatch(bodyLine);
                 if (callMatch != null) {
                   final calledName = callMatch.group(1)!;
@@ -222,46 +210,115 @@ class GenGenerator {
       return results;
     }
 
-    final featureName = p.basename(actualFeatureDir).toLowerCase();
+    // Locate target cascading files across Clean, MVVM, and MVC architectures
+    final usecaseFiles = _findTargetFiles(actualFeatureDir, '_usecase.dart');
+    final repoFiles = _findTargetFiles(actualFeatureDir, '_repository.dart',
+        excludeImpl: true);
+    final repoImplFiles =
+        _findTargetFiles(actualFeatureDir, '_repository_impl.dart');
+    final dsFiles = _findTargetFiles(actualFeatureDir, '_remote_datasource.dart',
+        excludeImpl: true);
+    final dsImplFiles =
+        _findTargetFiles(actualFeatureDir, '_remote_datasource_impl.dart');
 
-    final usecaseFile = _findFile(actualFeatureDir, ['domain', 'usecases'],
-        '${featureName}_usecase.dart');
-    final repoFile = _findFile(actualFeatureDir, ['domain', 'repositories'],
-        '${featureName}_repository.dart');
-    final repoImplFile = _findFile(actualFeatureDir, ['data', 'repositories'],
-        '${featureName}_repository_impl.dart');
-    final dsFile = _findFile(actualFeatureDir, ['data', 'data_sources'],
-        '${featureName}_remote_datasource.dart');
-    final dsImplFile = _findFile(actualFeatureDir, ['data', 'data_sources'],
-        '${featureName}_remote_datasource_impl.dart');
+    // MVVM Target Files
+    final serviceFiles =
+        _findTargetFiles(actualFeatureDir, '_service.dart', excludeImpl: true);
+    final serviceImplFiles =
+        _findTargetFiles(actualFeatureDir, '_service_impl.dart');
+
+    // MVC Target Files
+    final providerFiles =
+        _findTargetFiles(actualFeatureDir, '_provider.dart', excludeImpl: true);
+    final providerImplFiles =
+        _findTargetFiles(actualFeatureDir, '_provider_impl.dart');
 
     for (final meta in methodsToGenerate.values) {
-      if (usecaseFile != null && usecaseFile.existsSync()) {
-        final res = _generateInUseCase(usecaseFile, meta, packageName, dryRun);
-        results.add(res);
+      // Clean Architecture
+      for (final f in usecaseFiles) {
+        results.add(_generateInUseCase(f, meta, packageName, dryRun));
       }
-      if (repoFile != null && repoFile.existsSync()) {
-        final res = _generateInRepository(repoFile, meta, packageName, dryRun);
-        results.add(res);
+      for (final f in repoFiles) {
+        results.add(_generateInRepository(f, meta, packageName, dryRun));
       }
-      if (repoImplFile != null && repoImplFile.existsSync()) {
-        final res =
-            _generateInRepositoryImpl(repoImplFile, meta, packageName, dryRun);
-        results.add(res);
+      for (final f in repoImplFiles) {
+        results.add(_generateInRepositoryImpl(f, meta, packageName, dryRun));
       }
-      if (dsFile != null && dsFile.existsSync()) {
-        final res =
-            _generateInRemoteDataSource(dsFile, meta, packageName, dryRun);
-        results.add(res);
+      for (final f in dsFiles) {
+        results.add(_generateInRemoteDataSource(f, meta, packageName, dryRun));
       }
-      if (dsImplFile != null && dsImplFile.existsSync()) {
-        final res = _generateInRemoteDataSourceImpl(
-            dsImplFile, meta, packageName, dryRun);
-        results.add(res);
+      for (final f in dsImplFiles) {
+        results
+            .add(_generateInRemoteDataSourceImpl(f, meta, packageName, dryRun));
+      }
+
+      // MVVM Architecture
+      for (final f in serviceFiles) {
+        results.add(_generateInService(f, meta, packageName, dryRun));
+      }
+      for (final f in serviceImplFiles) {
+        results.add(_generateInServiceImpl(f, meta, packageName, dryRun));
+      }
+
+      // MVC Architecture
+      for (final f in providerFiles) {
+        results.add(_generateInProvider(f, meta, packageName, dryRun));
+      }
+      for (final f in providerImplFiles) {
+        results.add(_generateInProviderImpl(f, meta, packageName, dryRun));
       }
     }
 
     return results;
+  }
+
+  List<File> _collectCandidateFiles(String baseDir) {
+    final candidates = <File>[];
+    final dir = Directory(baseDir);
+    if (!dir.existsSync()) return candidates;
+
+    final files = dir
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))
+        .toList();
+
+    for (final file in files) {
+      final normPath = file.path.replaceAll('\\', '/').toLowerCase();
+      // Exclude generated files or impl files
+      if (normPath.endsWith('.g.dart') ||
+          normPath.endsWith('.freezed.dart') ||
+          normPath.endsWith('_impl.dart') ||
+          normPath.endsWith('_usecase.dart') ||
+          normPath.endsWith('_repository.dart') ||
+          normPath.endsWith('_remote_datasource.dart')) {
+        continue;
+      }
+      candidates.add(file);
+    }
+    return candidates;
+  }
+
+  List<File> _findTargetFiles(String baseDir, String suffix,
+      {bool excludeImpl = false}) {
+    final found = <File>[];
+    final dir = Directory(baseDir);
+    if (!dir.existsSync()) return found;
+
+    final files = dir
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))
+        .toList();
+
+    for (final file in files) {
+      final name = p.basename(file.path).toLowerCase();
+      if (name.endsWith(suffix.toLowerCase())) {
+        if (excludeImpl && name.endsWith('_impl.dart')) continue;
+        found.add(file);
+      }
+    }
+    return found;
   }
 
   String _cleanMethodName(String rawName) {
@@ -293,23 +350,6 @@ class GenGenerator {
         } catch (_) {}
       }
       current = current.parent;
-    }
-    return null;
-  }
-
-  File? _findFile(String baseDir, List<String> subdirs, String fileName) {
-    final path = p.joinAll([baseDir, ...subdirs, fileName]);
-    final file = File(path);
-    if (file.existsSync()) return file;
-
-    final targetDir = Directory(p.joinAll([baseDir, ...subdirs]));
-    if (targetDir.existsSync()) {
-      for (final entity in targetDir.listSync()) {
-        if (entity is File &&
-            p.basename(entity.path).toLowerCase() == fileName.toLowerCase()) {
-          return entity;
-        }
-      }
     }
     return null;
   }
@@ -421,6 +461,151 @@ class GenGenerator {
           filePath: file.path, methodsGenerated: 0, modified: false);
     }
 
+    final code = '''
+
+  @override
+  Future<ApiResponse<${meta.returnType}>> ${meta.methodName}(${meta.paramSignature}) async {
+    return ${_buildApiCallString(meta)};
+  }
+''';
+
+    content = _insertBeforeLastBrace(content, code);
+    content = _ensureApiResponseImport(content, packageName);
+    content = _ensureReturnTypeImport(content, meta, packageName);
+    content = _ensureDioNetworkImport(content, packageName);
+
+    if (!dryRun) {
+      file.writeAsStringSync(content);
+    }
+    return CodeGeneratorResult(
+        filePath: file.path, methodsGenerated: 1, modified: true);
+  }
+
+  CodeGeneratorResult _generateInService(
+      File file, ArchkitMetadata meta, String? packageName, bool dryRun) {
+    var content = file.readAsStringSync();
+    if (content.contains('${meta.methodName}(')) {
+      return CodeGeneratorResult(
+          filePath: file.path, methodsGenerated: 0, modified: false);
+    }
+
+    final isAbstract = content.contains('abstract class');
+    final code = isAbstract
+        ? '''
+  Future<ApiResponse<${meta.returnType}>> ${meta.methodName}(${meta.paramSignature});
+'''
+        : '''
+
+  Future<ApiResponse<${meta.returnType}>> ${meta.methodName}(${meta.paramSignature}) async {
+    return ${_buildApiCallString(meta)};
+  }
+''';
+
+    content = _insertBeforeLastBrace(content, code);
+    content = _ensureApiResponseImport(content, packageName);
+    content = _ensureReturnTypeImport(content, meta, packageName);
+    if (!isAbstract) {
+      content = _ensureDioNetworkImport(content, packageName);
+    }
+
+    if (!dryRun) {
+      file.writeAsStringSync(content);
+    }
+    return CodeGeneratorResult(
+        filePath: file.path, methodsGenerated: 1, modified: true);
+  }
+
+  CodeGeneratorResult _generateInServiceImpl(
+      File file, ArchkitMetadata meta, String? packageName, bool dryRun) {
+    var content = file.readAsStringSync();
+    if (content.contains('${meta.methodName}(')) {
+      return CodeGeneratorResult(
+          filePath: file.path, methodsGenerated: 0, modified: false);
+    }
+
+    final code = '''
+
+  @override
+  Future<ApiResponse<${meta.returnType}>> ${meta.methodName}(${meta.paramSignature}) async {
+    return ${_buildApiCallString(meta)};
+  }
+''';
+
+    content = _insertBeforeLastBrace(content, code);
+    content = _ensureApiResponseImport(content, packageName);
+    content = _ensureReturnTypeImport(content, meta, packageName);
+    content = _ensureDioNetworkImport(content, packageName);
+
+    if (!dryRun) {
+      file.writeAsStringSync(content);
+    }
+    return CodeGeneratorResult(
+        filePath: file.path, methodsGenerated: 1, modified: true);
+  }
+
+  CodeGeneratorResult _generateInProvider(
+      File file, ArchkitMetadata meta, String? packageName, bool dryRun) {
+    var content = file.readAsStringSync();
+    if (content.contains('${meta.methodName}(')) {
+      return CodeGeneratorResult(
+          filePath: file.path, methodsGenerated: 0, modified: false);
+    }
+
+    final isAbstract = content.contains('abstract class');
+    final code = isAbstract
+        ? '''
+  Future<ApiResponse<${meta.returnType}>> ${meta.methodName}(${meta.paramSignature});
+'''
+        : '''
+
+  Future<ApiResponse<${meta.returnType}>> ${meta.methodName}(${meta.paramSignature}) async {
+    return ${_buildApiCallString(meta)};
+  }
+''';
+
+    content = _insertBeforeLastBrace(content, code);
+    content = _ensureApiResponseImport(content, packageName);
+    content = _ensureReturnTypeImport(content, meta, packageName);
+    if (!isAbstract) {
+      content = _ensureDioNetworkImport(content, packageName);
+    }
+
+    if (!dryRun) {
+      file.writeAsStringSync(content);
+    }
+    return CodeGeneratorResult(
+        filePath: file.path, methodsGenerated: 1, modified: true);
+  }
+
+  CodeGeneratorResult _generateInProviderImpl(
+      File file, ArchkitMetadata meta, String? packageName, bool dryRun) {
+    var content = file.readAsStringSync();
+    if (content.contains('${meta.methodName}(')) {
+      return CodeGeneratorResult(
+          filePath: file.path, methodsGenerated: 0, modified: false);
+    }
+
+    final code = '''
+
+  @override
+  Future<ApiResponse<${meta.returnType}>> ${meta.methodName}(${meta.paramSignature}) async {
+    return ${_buildApiCallString(meta)};
+  }
+''';
+
+    content = _insertBeforeLastBrace(content, code);
+    content = _ensureApiResponseImport(content, packageName);
+    content = _ensureReturnTypeImport(content, meta, packageName);
+    content = _ensureDioNetworkImport(content, packageName);
+
+    if (!dryRun) {
+      file.writeAsStringSync(content);
+    }
+    return CodeGeneratorResult(
+        filePath: file.path, methodsGenerated: 1, modified: true);
+  }
+
+  String _buildApiCallString(ArchkitMetadata meta) {
     final httpMethodCall = meta.httpMethod.toLowerCase();
 
     var endpointStr = meta.endpoint;
@@ -441,52 +626,28 @@ class GenGenerator {
             ? '(response) => response'
             : '(response) => ${meta.returnType}.fromJson(response)');
 
-    String apiCallStr;
     if (meta.params.isEmpty) {
-      apiCallStr =
-          "api.$httpMethodCall(endpoint: '$endpointStr', converter: $converterStr)";
+      return "api.$httpMethodCall(endpoint: '$endpointStr', converter: $converterStr)";
     } else if (httpMethodCall == 'post' ||
         httpMethodCall == 'put' ||
         httpMethodCall == 'patch') {
       if (meta.params.length == 1) {
-        apiCallStr =
-            "api.$httpMethodCall(endpoint: '$endpointStr', data: ${meta.params.first.name}, converter: $converterStr)";
+        return "api.$httpMethodCall(endpoint: '$endpointStr', data: ${meta.params.first.name}, converter: $converterStr)";
       } else {
         final dataMap =
             "{${meta.params.map((p) => "'${p.name}': ${p.name}").join(', ')}}";
-        apiCallStr =
-            "api.$httpMethodCall(endpoint: '$endpointStr', data: $dataMap, converter: $converterStr)";
+        return "api.$httpMethodCall(endpoint: '$endpointStr', data: $dataMap, converter: $converterStr)";
       }
     } else {
       // GET or DELETE
       if (hasPathTemplate) {
-        apiCallStr =
-            "api.$httpMethodCall(endpoint: '$endpointStr', converter: $converterStr)";
+        return "api.$httpMethodCall(endpoint: '$endpointStr', converter: $converterStr)";
       } else {
         final queryMap =
             "{${meta.params.map((p) => "'${p.name}': ${p.name}").join(', ')}}";
-        apiCallStr =
-            "api.$httpMethodCall(endpoint: '$endpointStr', queryParams: $queryMap, converter: $converterStr)";
+        return "api.$httpMethodCall(endpoint: '$endpointStr', queryParams: $queryMap, converter: $converterStr)";
       }
     }
-
-    final code = '''
-
-  @override
-  Future<ApiResponse<${meta.returnType}>> ${meta.methodName}(${meta.paramSignature}) async {
-    return $apiCallStr;
-  }
-''';
-
-    content = _insertBeforeLastBrace(content, code);
-    content = _ensureApiResponseImport(content, packageName);
-    content = _ensureReturnTypeImport(content, meta, packageName);
-
-    if (!dryRun) {
-      file.writeAsStringSync(content);
-    }
-    return CodeGeneratorResult(
-        filePath: file.path, methodsGenerated: 1, modified: true);
   }
 
   String _insertBeforeLastBrace(String content, String code) {
@@ -504,6 +665,15 @@ class GenGenerator {
     final importStr = packageName != null
         ? "import 'package:$packageName/core/util/api_response.dart';\n"
         : "import '../../core/util/api_response.dart';\n";
+
+    return importStr + content;
+  }
+
+  String _ensureDioNetworkImport(String content, String? packageName) {
+    if (content.contains('dio_network.dart')) return content;
+    final importStr = packageName != null
+        ? "import 'package:$packageName/core/network/dio_network.dart';\n"
+        : "import '../../core/network/dio_network.dart';\n";
 
     return importStr + content;
   }

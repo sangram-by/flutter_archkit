@@ -207,6 +207,80 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     expect(dsImplContent, contains('home_bloc.dart'));
   });
 
+  test('GenGenerator generates cascading methods for MVVM services', () async {
+    final service = GenGenerator();
+    final mvvmDir = Directory(p.join(tempDir.path, 'lib', 'mvvm_feature'));
+    final vmFile =
+        File(p.join(mvvmDir.path, 'viewmodels', 'home_viewmodel.dart'));
+    vmFile.parent.createSync(recursive: true);
+    vmFile.writeAsStringSync('''
+import 'package:flutter_archkit/flutter_archkit.dart';
+
+class User {}
+
+class HomeViewModel {
+  @Archkit(endpoint: "/loadProfile", method: "GET", returnType: User)
+  Future<void> fetchProfile(String userId) async {
+    final res = await service.fetchProfile(userId);
+  }
+}
+''');
+
+    final serviceFile =
+        File(p.join(mvvmDir.path, 'services', 'home_service.dart'));
+    serviceFile.parent.createSync(recursive: true);
+    serviceFile.writeAsStringSync('''
+class HomeService {}
+''');
+
+    final results = await service.generateFeatureCode(targetPath: mvvmDir.path);
+    expect(results, isNotEmpty);
+
+    final serviceContent = serviceFile.readAsStringSync();
+    expect(
+        serviceContent,
+        contains(
+            'Future<ApiResponse<User>> fetchProfile(String userId) async'));
+    expect(serviceContent, contains("api.get(endpoint: '/loadProfile'"));
+  });
+
+  test('GenGenerator generates cascading methods for MVC providers', () async {
+    final service = GenGenerator();
+    final mvcDir = Directory(p.join(tempDir.path, 'lib', 'mvc_feature'));
+    final controllerFile =
+        File(p.join(mvcDir.path, 'controllers', 'home_controller.dart'));
+    controllerFile.parent.createSync(recursive: true);
+    controllerFile.writeAsStringSync('''
+import 'package:flutter_archkit/flutter_archkit.dart';
+
+class User {}
+
+class HomeController {
+  @Archkit(endpoint: "/updateData", method: "POST", returnType: User)
+  Future<void> updateData(dynamic payload) async {
+    final res = await provider.updateData(payload);
+  }
+}
+''');
+
+    final providerFile =
+        File(p.join(mvcDir.path, 'providers', 'home_provider.dart'));
+    providerFile.parent.createSync(recursive: true);
+    providerFile.writeAsStringSync('''
+class HomeProvider {}
+''');
+
+    final results = await service.generateFeatureCode(targetPath: mvcDir.path);
+    expect(results, isNotEmpty);
+
+    final providerContent = providerFile.readAsStringSync();
+    expect(
+        providerContent,
+        contains(
+            'Future<ApiResponse<User>> updateData(dynamic payload) async'));
+    expect(providerContent, contains("api.post(endpoint: '/updateData'"));
+  });
+
   test('GenerateCommand metadata test', () {
     final command = GenerateCommand();
     expect(command.name, equals('generate'));
