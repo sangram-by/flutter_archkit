@@ -1,111 +1,195 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Sangramdeve/flutter_archkit/main/example/assets/logo.png" alt="Flutter ArchKit Logo" width="140" onerror="this.style.display='none'"/>
+</p>
+
 # Flutter ArchKit
 
-[![pub package](https://img.shields.io/pub/v/flutter_archkit.svg)](https://pub.dev/packages/flutter_archkit)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <strong>The Ultimate Flutter Architecture Generator, Feature Scaffolder, Code Generator & Multi-Flavor CLI Toolkit</strong>
+</p>
 
-A comprehensive Flutter Architecture CLI generator and multi-flavor configuration tool. `flutter_archkit` automates scaffolding Flutter projects with Clean, MVVM, or MVC architecture, state management (Bloc, Cubit, Riverpod, Provider, GetX), modular feature generators, routing setup, network layer generation, and multi-flavor environment configurations.
-
----
-
-## Features
-
-- 🏗️ **Interactive Project Generator (`archkit create`)**: Scaffolds complete Flutter apps with interactive CLI prompts for Architecture, State Management, Organization ID, and Target Platforms.
-- ⚡ **Feature Module Generator (`archkit feature <name>` / `archkit -f <name>`)**: Instantly generates feature modules (`auth`, `profile`, `home`, etc.) matching your project's architecture.
-- 🧠 **Smart `@Archkit` Code Generator (`archkit generate` / `archkit g`)**: Automatically scans presentation event handlers and generates cascading UseCases, Repositories, DataSources, and Service interfaces across Domain and Data layers.
-- 🛣️ **Route System Setup (`archkit route` / `archkit r`)**: Scaffolds routing configurations with support for Navigator 1.0, Navigator 2.0, Go Router (with optional `StatefulShellRoute` bottom navigation), Auto Route, and GetX Routing.
-- 🌐 **Network Layer Generator (`archkit network` / `archkit n`)**: Scaffolds production-ready Dio network layer with generic `ApiResponse<T>`, custom `ApiException`, typed interfaces, logger/auth interceptors, and utility `typedefs`.
-- 🔄 **Smart Metadata Auto-Detection**: Stores selected project configuration in `.metadata` so features, routes, and generators integrate seamlessly without requiring command flags.
-- 📂 **Modular Template Engine**: Clean templates for Clean Architecture (data, domain, presentation, di), MVVM (models, services, viewmodels, views), and MVC (models, controllers, views).
-- 🤖 **Android Flavor Setup**: Automatically configures `productFlavors` and `applicationId` in `android/app/flavor.gradle.kts` and links with `build.gradle.kts`.
-- 🍎 **iOS Flavor Setup**: Generates flavor `.xcconfig` files, CocoaPods target dependencies (`#include? Pods-Runner`), shared `.xcscheme` schemes, patches `Info.plist`, updates Xcode `project.pbxproj` build configurations, and sets `IPHONEOS_DEPLOYMENT_TARGET = 16.0`.
-- ⚙️ **Dart ServerConfig**: Generates strongly-typed `lib/core/config/server_config.dart` runtime environment configurations.
-- 💻 **IDE Support**: Automatically writes `.vscode/launch.json` for VS Code and `.run/<flavor>.run.xml` run configurations for Android Studio / IntelliJ IDEA.
+<p align="center">
+  <a href="https://pub.dev/packages/flutter_archkit"><img src="https://img.shields.io/pub/v/flutter_archkit.svg?style=flat-square&color=0175C2" alt="Pub Version"></a>
+  <a href="https://pub.dev/packages/flutter_archkit/score"><img src="https://img.shields.io/pub/points/flutter_archkit?style=flat-square&color=2E8B57&label=pub%20points" alt="Pub Points"></a>
+  <a href="https://pub.dev/packages/flutter_archkit/score"><img src="https://img.shields.io/pub/likes/flutter_archkit?style=flat-square&color=blue" alt="Pub Likes"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" alt="License: MIT"></a>
+  <a href="https://dart.dev"><img src="https://img.shields.io/badge/Dart-SDK%20%3E%3D3.0.0-0175C2.svg?style=flat-square" alt="Dart SDK"></a>
+  <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS-teal.svg?style=flat-square" alt="Platforms"></a>
+</p>
 
 ---
 
-## Installation
+## 📖 Overview
 
-Activate `flutter_archkit` globally via Pub:
+**`flutter_archkit`** is an enterprise-grade command-line interface (CLI) toolkit and code generator designed to eliminate architectural boilerplate and streamline Flutter app development. 
+
+Whether starting a greenfield project or scaling an existing production codebase, `flutter_archkit` automates:
+- 🏗️ **Project Scaffolding**: Interactive wizard for Clean Architecture, MVVM, or MVC.
+- ⚡ **Feature Modules**: One-command feature generator that matches your project's architecture and state management.
+- 🧠 **`@Archkit` Code Generation**: Automatically writes cascading UseCases, Repositories, DataSources, and API calls from annotated presentation handlers.
+- 🛣️ **Router Infrastructure**: Scaffolds Navigator 1.0/2.0, Go Router (with Bottom Navigation Shells), Auto Route, or GetX Routing.
+- 🌐 **Network Layer**: Scaffolds production Dio HTTP client with generic `ApiResponse<T>`, custom `ApiException`, interceptors, and typed contracts.
+- 🎯 **Multi-Flavor Environments**: Configures Android Flavors, iOS Schemes & `.xcconfig`, Dart `ServerConfig`, VS Code `launch.json`, and Android Studio run configurations.
+
+---
+
+## 📑 Table of Contents
+
+- [Features & Architecture Matrix](#-features--architecture-matrix)
+- [CLI Command Cheat Sheet](#-cli-command-cheat-sheet)
+- [Installation](#-installation)
+- [Usage Guide](#-usage-guide)
+  - [1. Creating a Project (`archkit create`)](#1-creating-a-project-archkit-create)
+  - [2. Scaffolding Feature Modules (`archkit feature`)](#2-scaffolding-feature-modules-archkit-feature)
+  - [3. Setting Up Route Systems (`archkit route`)](#3-setting-up-route-systems-archkit-route)
+  - [4. Generating Network Layer (`archkit network`)](#4-generating-network-layer-archkit-network)
+  - [5. `@Archkit` Code Generation (`archkit generate`)](#5-smart-archkit-code-generation-archkit-generate)
+  - [6. Multi-Flavor Configuration (`setup_flavor`)](#6-multi-flavor-configuration-setup_flavor)
+- [Directory Structures](#-directory-structures)
+- [Example Application](#-example-application)
+- [Contributing & Issues](#-contributing--issues)
+- [License](#-license)
+
+---
+
+## 🧩 Features & Architecture Matrix
+
+| Capability | Supported Technologies & Options |
+| :--- | :--- |
+| **Architectures** | **Clean Architecture** (Data / Domain / Presentation / DI), **MVVM** (Models / Services / ViewModels / Views), **MVC** (Models / Controllers / Views) |
+| **State Management** | **BLoC**, **Cubit**, **Riverpod**, **Provider**, **GetX** |
+| **Routing Systems** | **Navigator 1.0**, **Navigator 2.0**, **Go Router** (with StatefulShellRoute bottom navigation support), **Auto Route**, **GetX Routing** |
+| **Networking** | **Dio 5.x**, Generic `ApiResponse<T>`, `ApiException`, Logging Interceptor, Auth Interceptors, `ApiInterface` contract |
+| **Code Generation** | **`@Archkit` annotation parser**: Cascading generation of UseCases, Repositories, Remote DataSources, and Service interfaces |
+| **Multi-Flavor** | **Android** (`flavor.gradle.kts`), **iOS** (XCConfig, Schemes, `project.pbxproj`), **Dart** (`ServerConfig`), **IDE Run Configs** (VS Code & Android Studio) |
+| **Configuration** | **Smart `.metadata` tracking**: Auto-detects project architecture without passing repetitive flags |
+
+---
+
+## ⚡ CLI Command Cheat Sheet
+
+| Command | Aliases | Description | Example |
+| :--- | :--- | :--- | :--- |
+| `archkit create <app_name>` | `-c`, `--create` | Creates a new Flutter app with chosen architecture & state management | `archkit create my_app -a Clean -s Bloc` |
+| `archkit feature <name>` | `-f`, `--feature` | Scaffolds a new feature module matching project architecture | `archkit feature auth` or `archkit -f profile` |
+| `archkit route` | `-r`, `--route` | Scaffolds routing system & installs router dependencies | `archkit route -t "Go Router" --shell` |
+| `archkit network` | `-n`, `--network` | Scaffolds production Dio HTTP network layer | `archkit network --override` |
+| `archkit generate` | `g`, `gen`, `-g` | Generates domain & data layer methods for `@Archkit` annotations | `archkit g -p lib/features/auth` |
+| `setup_flavor` | `setup_flavor` | Configures multi-flavor environments (Android, iOS, Dart, IDEs) | `dart run flutter_archkit:setup_flavor` |
+
+---
+
+## 📦 Installation
+
+### Global Activation (Recommended)
+Activate `flutter_archkit` globally to use the `archkit` CLI from anywhere in your terminal:
 
 ```bash
 dart pub global activate flutter_archkit
 ```
 
-Or add it to your project `pubspec.yaml` under `dev_dependencies`:
+> **Note**: Ensure your global pub cache bin path is added to your system's `PATH` environment variable.
+
+### As a Project Dependency
+Add `flutter_archkit` to your Flutter project's `pubspec.yaml` under `dev_dependencies` to utilize the `@Archkit` annotation and flavor generators:
 
 ```yaml
 dev_dependencies:
   flutter_archkit: ^0.2.0
 ```
 
+Then run:
+```bash
+flutter pub get
+```
+
 ---
 
-## Usage Guide
+## 🚀 Usage Guide
 
-### 1. Creating a New Flutter Project (`archkit create`)
+### 1. Creating a Project (`archkit create`)
 
-Run the interactive project creation wizard:
+Scaffold a complete, production-ready Flutter application with interactive terminal prompts:
 
 ```bash
 archkit create my_app
 ```
 
-**Interactive Prompts:**
-- **Select Architecture**: `Clean` | `MVVM` | `MVC`
-- **Select State Management**: `Bloc` | `Cubit` | `Riverpod` | `Provider` | `GetX`
-- **Organization Identifier**: e.g., `com.example`
-- **Platforms**: `Android`, `iOS`, `Web`, `Windows`, `macOS`, `Linux`
+```text
+? Select Architecture:
+  ❯ Clean Architecture (Data, Domain, Presentation, DI)
+    MVVM Architecture (Models, Services, ViewModels, Views)
+    MVC Architecture (Models, Controllers, Views)
 
-Or pass parameters via command flags:
+? Select State Management:
+  ❯ Bloc
+    Cubit
+    Riverpod
+    Provider
+    GetX
+
+? Organization Identifier: com.example
+? Target Platforms: android, ios, web
+```
+
+#### Non-Interactive CLI Mode
+Automate CI/CD or scripted project generation using command-line flags:
+
 ```bash
-archkit create my_app --org com.example --architecture Clean --state-management Bloc --platforms android,ios
+archkit create my_app \
+  --org com.example \
+  --architecture Clean \
+  --state-management Bloc \
+  --platforms android,ios,web
 ```
 
 ---
 
-### 2. Scaffolding a Feature Module (`archkit feature <name>` / `archkit -f <name>`)
+### 2. Scaffolding Feature Modules (`archkit feature`)
 
-Inside any project created with `archkit`, run:
+Generate modular, architecture-compliant feature packages in seconds. `archkit` automatically detects your project's architecture and state management from `.metadata`!
 
 ```bash
+# Full command
 archkit feature auth
+
+# Or quick shortcut
+archkit -f user_profile
 ```
 
-or use the shortcut:
-
-```bash
-archkit -f auth
-```
-
-`archkit` auto-detects your project's architecture and state management from `.metadata` and generates the feature module matching your established code structure!
+**Clean Architecture Feature Output (`lib/features/auth/`):**
+- `domain/entities/auth_entity.dart`
+- `domain/repositories/auth_repository.dart`
+- `domain/usecases/auth_usecase.dart`
+- `data/models/auth_model.dart`
+- `data/data_sources/auth_remote_datasource.dart` & `_impl.dart`
+- `data/repositories/auth_repository_impl.dart`
+- `presentation/bloc/auth_bloc.dart`, `auth_event.dart`, `auth_state.dart`
+- `presentation/page/auth_page.dart`
+- `di/auth_di.dart`
 
 ---
 
-### 3. Setting Up Route System (`archkit route` / `archkit r`)
+### 3. Setting Up Route Systems (`archkit route`)
 
-Set up a robust routing system tailored to your preferred router package:
+Set up a robust navigation infrastructure tailored to your preferred routing engine:
 
 ```bash
 archkit route
-```
-
-or use the alias:
-
-```bash
+# Or alias
 archkit r
 ```
 
-**Interactive Prompts:**
-- **Select Route System**:
-  - `Navigator 1.0` (Standard Flutter MaterialPageRoute)
-  - `Navigator 2.0` (Declarative RouterDelegate & RouteInformationParser)
-  - `Go Router` (Supports `--shell` flag for `StatefulShellRoute` bottom navigation)
-  - `Auto Route` (Strongly-typed code-generated routes)
-  - `GetX Routing` (GetMaterialApp & GetPage routes)
+#### Supported Route Engines:
+1. **`Navigator 1.0`**: Traditional named routes with `RouteGenerator` and `MaterialPageRoute`.
+2. **`Navigator 2.0`**: Declarative routing with custom `RouterDelegate` and `RouteInformationParser`.
+3. **`Go Router`**: URL-driven routing supporting deep links, route redirection, and optional `StatefulShellRoute` bottom navigation.
+4. **`Auto Route`**: Type-safe code-generated navigation.
+5. **`GetX Routing`**: Lightweight `GetPage` navigation.
 
-**CLI Command Flags:**
+#### CLI Command Flags:
 ```bash
-# Non-interactive Go Router setup with Stateful Shell Navigation
+# Go Router with Bottom Navigation Shell
 archkit route --type "Go Router" --shell
 
 # Auto Route setup
@@ -115,44 +199,46 @@ archkit route -t auto_route
 archkit route -t getx
 ```
 
-*Note: Running `archkit route` automatically updates `pubspec.yaml` with the required router dependencies (e.g. `go_router`, `auto_route`, `get`) and persists the router choice in `.metadata`.*
+*Note: Running `archkit route` automatically adds the required package dependencies to `pubspec.yaml` and persists your configuration in `.metadata`.*
 
 ---
 
-### 4. Scaffolding Network Layer (`archkit network` / `archkit n`)
+### 4. Generating Network Layer (`archkit network`)
 
-Generate a production-grade Dio HTTP client architecture:
+Scaffold a battle-tested Dio network client architecture in `lib/core/network/` and `lib/core/util/`:
 
 ```bash
 archkit network
-```
-
-or use the alias:
-
-```bash
+# Or alias
 archkit n
 ```
 
-**CLI Command Flags:**
+#### CLI Options:
 ```bash
-# Specify target directory path
+# Specify custom project path
 archkit network --path ./my_project
 
 # Force overwrite existing network files
 archkit network --override
 ```
 
-*Note: Running `archkit network` automatically adds `dio: ^5.4.3` to your project's `pubspec.yaml`.*
+#### What gets scaffolded?
+- **`ApiResponse<T>`**: Standardized response wrapper representing `Success`, `Error`, and `Loading` states.
+- **`ApiException`**: Centralized exception handler parsing HTTP status codes, validation errors, and timeout exceptions.
+- **`ApiInterface`**: Abstract contract for GET, POST, PUT, DELETE, and PATCH methods.
+- **`DioNetwork` & `DioServices`**: Configured Dio instance with base URLs, headers, connection timeouts, and SSL pinning hooks.
+- **Interceptors**:
+  - `ApiInterceptor`: Automatic bearer token injection and authentication headers.
+  - `LoggingInterceptor`: Detailed console request/response logging in debug mode.
 
 ---
 
-### 5. Generating Domain & Data Layers with `@Archkit` (`archkit generate` / `archkit g`)
+### 5. Smart `@Archkit` Code Generation (`archkit generate`)
 
-Speed up feature development by writing your presentation logic first and generating the domain & data boilerplate automatically.
+Speed up development exponentially by designing your UI/Presentation layer first and generating all corresponding domain and data layer classes with a single command.
 
-#### Step 1: Annotate your presentation handler or method
-
-Import `flutter_archkit` and annotate event handlers or functions in your BLoC, Cubit, Controller, Riverpod notifier, or ViewModel with `@Archkit` or `@archkit`:
+#### Step 1: Annotate your Presentation Method
+Import `package:flutter_archkit/flutter_archkit.dart` and annotate event handlers or functions in your BLoC, Cubit, Riverpod Notifier, ViewModel, or Controller:
 
 ```dart
 import 'package:flutter_archkit/flutter_archkit.dart';
@@ -172,64 +258,59 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
     FetchWeatherEvent event,
     Emitter<WeatherState> emit, {
     required String city,
+    String? units,
   }) async {
-    // Generated UseCase is automatically invoked here!
+    // Business logic...
   }
 }
 ```
 
-#### Step 2: Run the code generator
-
+#### Step 2: Run Code Generator
 ```bash
-archkit generate
-```
-
-or use the shortcut:
-
-```bash
-archkit g
-```
-
-**CLI Command Flags:**
-```bash
-# Target a specific feature folder
+# Run code generation on target feature
 archkit generate --path lib/features/weather
-# or
+
+# Or use shortcuts
 archkit g -p lib/features/weather
 
 # Preview changes without modifying files
-archkit g --dry-run
+archkit g -p lib/features/weather --dry-run
 ```
 
-**What gets generated automatically?**
-- **Clean Architecture**:
-  - `domain/usecases/fetch_weather_usecase.dart` (Strongly typed UseCase class)
-  - `domain/repositories/weather_repository.dart` (Repository interface method)
-  - `data/repositories/weather_repository_impl.dart` (Repository implementation)
-  - `data/data_sources/weather_remote_datasource.dart` (DataSource contract)
-  - `data/data_sources/weather_remote_datasource_impl.dart` (Dio network implementation with endpoint & HTTP method)
-- **MVVM Architecture**:
-  - `services/weather_service.dart` (Service interface & Dio implementation)
-- **MVC Architecture**:
-  - `controllers/weather_controller.dart` & `providers/weather_provider.dart`
+#### Automated Generation Pipeline:
+```mermaid
+graph LR
+    A["@Archkit Annotation in Presentation"] --> B["UseCase (Domain)"]
+    B --> C["Repository Interface (Domain)"]
+    C --> D["Repository Implementation (Data)"]
+    D --> E["Remote DataSource Contract (Data)"]
+    E --> F["Remote DataSource Impl (Dio Client)"]
+```
+
+- **`domain/usecases/fetch_weather_usecase.dart`**: Generates typed UseCase with matching parameters (`city`, `units`).
+- **`domain/repositories/weather_repository.dart`**: Injects contract method returning `Future<ApiResponse<WeatherModel>>`.
+- **`data/repositories/weather_repository_impl.dart`**: Implements method delegating to the remote data source.
+- **`data/data_sources/weather_remote_datasource.dart`**: Declares data source method.
+- **`data/data_sources/weather_remote_datasource_impl.dart`**: Generates concrete Dio network call with `/weather` endpoint and `GET` method.
 
 ---
 
-### 6. Multi-Flavor Setup (`setup_flavor`)
+### 6. Multi-Flavor Configuration (`setup_flavor`)
 
-Generate a sample `flavor.yaml` automatically:
+Easily configure enterprise-grade multi-environment setups (e.g. `dev`, `staging`, `prod`) for both Android and iOS in seconds.
 
+#### Step 1: Initialize `flavor.yaml`
 ```bash
 dart run flutter_archkit:setup_flavor --init
 ```
 
-Or create `flavor.yaml` manually in your project root:
+Customize `flavor.yaml` in your project root:
 
 ```yaml
 flavors:
   dev:
     app:
-      name: "Example Dev"
+      name: "App [DEV]"
       baseUrl: "https://dev-api.example.com"
     android:
       applicationId: "com.example.app.dev"
@@ -238,7 +319,7 @@ flavors:
 
   prod:
     app:
-      name: "Example"
+      name: "App"
       baseUrl: "https://api.example.com"
     android:
       applicationId: "com.example.app"
@@ -246,21 +327,32 @@ flavors:
       bundleId: "com.example.app"
 ```
 
-Validate your configuration:
-
+#### Step 2: Validate Configuration
 ```bash
 dart run flutter_archkit:setup_flavor --validate
 ```
 
-Execute the multi-flavor code generator:
-
+#### Step 3: Run the Flavor Generator
 ```bash
 dart run flutter_archkit:setup_flavor
 ```
 
+#### Automated Native & IDE Setup:
+- **Android**: Configures `productFlavors` and `applicationId` in `android/app/flavor.gradle.kts` and links with `build.gradle.kts`.
+- **iOS**: 
+  - Generates `.xcconfig` build configuration files (`Debug-dev.xcconfig`, `Release-prod.xcconfig`, etc.).
+  - Configures CocoaPods target integrations (`#include? "Pods-Runner.<mode>-<flavor>.xcconfig"`).
+  - Generates shared `.xcscheme` scheme definitions in `Runner.xcodeproj/xcshareddata/xcschemes/`.
+  - Patches `Info.plist` with dynamic `CFBundleDisplayName` and `BaseURL`.
+  - Updates Xcode `project.pbxproj` and upgrades `IPHONEOS_DEPLOYMENT_TARGET = 16.0`.
+- **Dart ServerConfig**: Generates strongly-typed `lib/core/config/server_config.dart`.
+- **IDE Run Configurations**:
+  - Writes `.vscode/launch.json` for 1-click debugging in VS Code.
+  - Generates `.run/<flavor>.run.xml` for Android Studio / IntelliJ IDEA.
+
 ---
 
-## Generated Architecture Layouts
+## 📁 Directory Structures
 
 ### Clean Architecture (`lib/features/auth/`)
 ```text
@@ -277,6 +369,8 @@ lib/features/auth/
 │   ├── auth_di.dart
 │   └── auth_di.config.dart
 ├── domain/
+│   ├── entities/
+│   │   └── auth_entity.dart
 │   ├── repositories/
 │   │   └── auth_repository.dart
 │   └── usecases/
@@ -294,23 +388,23 @@ lib/features/auth/
 ```text
 lib/core/router/
 ├── app_router.dart           # Central router definition (GoRouter / RouterDelegate / AppPages)
-├── app_routes.dart           # Route name string constants
-├── route_functions.dart      # Navigation helper utilities (push, pop, clearAndGo)
-└── bottom_shell_route.dart   # StatefulShellRoute bottom navbar shell widget (Go Router)
+├── app_routes.dart           # Strongly-typed route name constants
+├── route_functions.dart      # Global navigation utilities (push, pop, clearAndGo)
+└── bottom_shell_route.dart   # StatefulShellRoute bottom navigation scaffold (Go Router)
 ```
 
 ### Network Layer Structure (`lib/core/`)
 ```text
 lib/core/
 ├── network/
-│   ├── api_exception.dart             # Typed network exception handling
-│   ├── api_interface.dart             # Abstract API client contract interface
-│   ├── dio.dart                       # Configured Dio HTTP client factory instance
-│   ├── dio_network.dart               # Concrete Dio HTTP request handler
+│   ├── api_exception.dart             # Typed HTTP & socket exception handling
+│   ├── api_interface.dart             # Abstract API client contract
+│   ├── dio.dart                       # Configured Dio HTTP factory instance
+│   ├── dio_network.dart               # Concrete Dio HTTP request dispatcher
 │   ├── dio_services.dart              # Base network service class
 │   └── interceptors/
-│       ├── api_interceptor.dart       # Auth token & header interceptor
-│       └── logging.dart               # HTTP request/response logger interceptor
+│       ├── api_interceptor.dart       # Bearer token & authorization header interceptor
+│       └── logging.dart               # Colored request/response logger interceptor
 └── util/
     ├── api_response.dart              # Generic ApiResponse<T> state wrapper
     └── typedefs.dart                  # Utility Dart typedefs (JSON, Callbacks)
@@ -319,22 +413,50 @@ lib/core/
 ### MVVM Architecture (`lib/`)
 ```text
 lib/
-├── models/auth_model.dart
-├── services/auth_service.dart
-├── viewmodels/auth_provider.dart (or auth_viewmodel.dart / auth_bloc.dart / auth_controller.dart)
-└── views/auth_view.dart
+├── models/
+│   └── user_model.dart
+├── services/
+│   └── user_service.dart
+├── viewmodels/
+│   └── user_viewmodel.dart (or user_provider.dart / user_bloc.dart)
+└── views/
+    └── user_view.dart
 ```
 
 ### MVC Architecture (`lib/`)
 ```text
 lib/
-├── models/auth_model.dart
-├── controllers/auth_controller.dart
-└── views/auth_view.dart
+├── models/
+│   └── user_model.dart
+├── controllers/
+│   └── user_controller.dart
+└── views/
+    └── user_view.dart
 ```
 
 ---
 
-## License
+## 🌟 Example Application
+
+A full reference application demonstrating Clean Architecture, MVVM, MVC, Network Layer, Routing, and Flavor configurations is available in the [`example/`](example/) directory.
+
+To run the example app:
+```bash
+cd example
+flutter pub get
+flutter run
+```
+
+---
+
+## 🤝 Contributing & Issues
+
+Contributions, feature suggestions, and bug reports are welcome!
+- 🐛 **Report Issues**: [GitHub Issue Tracker](https://github.com/Sangramdeve/flutter_archkit/issues)
+- 💡 **Source Code**: [GitHub Repository](https://github.com/Sangramdeve/flutter_archkit)
+
+---
+
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
