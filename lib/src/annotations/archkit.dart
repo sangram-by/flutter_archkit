@@ -7,7 +7,7 @@ class Archkit {
   /// Optional HTTP method (e.g. `'GET'`, `'POST'`, `'PUT'`, `'DELETE'`)
   final String? method;
 
-  /// Optional inner return type T for ApiResponse<T> (e.g. `User` or `'User'`)
+  /// Optional inner return type T for `ApiResponse<T>` (e.g. `User` or `'User'`)
   final dynamic returnType;
 
   const Archkit({
