@@ -11,9 +11,10 @@ A comprehensive Flutter Architecture CLI generator and multi-flavor configuratio
 
 - 🏗️ **Interactive Project Generator (`archkit create`)**: Scaffolds complete Flutter apps with interactive CLI prompts for Architecture, State Management, Organization ID, and Target Platforms.
 - ⚡ **Feature Module Generator (`archkit feature <name>` / `archkit -f <name>`)**: Instantly generates feature modules (`auth`, `profile`, `home`, etc.) matching your project's architecture.
+- 🧠 **Smart `@Archkit` Code Generator (`archkit generate` / `archkit g`)**: Automatically scans presentation event handlers and generates cascading UseCases, Repositories, DataSources, and Service interfaces across Domain and Data layers.
 - 🛣️ **Route System Setup (`archkit route` / `archkit r`)**: Scaffolds routing configurations with support for Navigator 1.0, Navigator 2.0, Go Router (with optional `StatefulShellRoute` bottom navigation), Auto Route, and GetX Routing.
 - 🌐 **Network Layer Generator (`archkit network` / `archkit n`)**: Scaffolds production-ready Dio network layer with generic `ApiResponse<T>`, custom `ApiException`, typed interfaces, logger/auth interceptors, and utility `typedefs`.
-- 🔄 **Smart Metadata Auto-Detection**: Stores selected project configuration in `.metadata` so features and routes integrate seamlessly without requiring command flags.
+- 🔄 **Smart Metadata Auto-Detection**: Stores selected project configuration in `.metadata` so features, routes, and generators integrate seamlessly without requiring command flags.
 - 📂 **Modular Template Engine**: Clean templates for Clean Architecture (data, domain, presentation, di), MVVM (models, services, viewmodels, views), and MVC (models, controllers, views).
 - 🤖 **Android Flavor Setup**: Automatically configures `productFlavors` and `applicationId` in `android/app/flavor.gradle.kts` and links with `build.gradle.kts`.
 - 🍎 **iOS Flavor Setup**: Generates flavor `.xcconfig` files, CocoaPods target dependencies (`#include? Pods-Runner`), shared `.xcscheme` schemes, patches `Info.plist`, updates Xcode `project.pbxproj` build configurations, and sets `IPHONEOS_DEPLOYMENT_TARGET = 16.0`.
@@ -34,7 +35,7 @@ Or add it to your project `pubspec.yaml` under `dev_dependencies`:
 
 ```yaml
 dev_dependencies:
-  flutter_archkit: ^0.1.0
+  flutter_archkit: ^0.2.0
 ```
 
 ---
@@ -145,7 +146,76 @@ archkit network --override
 
 ---
 
-### 5. Multi-Flavor Setup (`setup_flavor`)
+### 5. Generating Domain & Data Layers with `@Archkit` (`archkit generate` / `archkit g`)
+
+Speed up feature development by writing your presentation logic first and generating the domain & data boilerplate automatically.
+
+#### Step 1: Annotate your presentation handler or method
+
+Import `flutter_archkit` and annotate event handlers or functions in your BLoC, Cubit, Controller, Riverpod notifier, or ViewModel with `@Archkit` or `@archkit`:
+
+```dart
+import 'package:flutter_archkit/flutter_archkit.dart';
+import '../models/weather_model.dart';
+
+class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
+  WeatherBloc() : super(WeatherInitial()) {
+    on<FetchWeatherEvent>(_onFetchWeather);
+  }
+
+  @Archkit(
+    endpoint: '/weather',
+    method: 'GET',
+    returnType: WeatherModel,
+  )
+  Future<void> _onFetchWeather(
+    FetchWeatherEvent event,
+    Emitter<WeatherState> emit, {
+    required String city,
+  }) async {
+    // Generated UseCase is automatically invoked here!
+  }
+}
+```
+
+#### Step 2: Run the code generator
+
+```bash
+archkit generate
+```
+
+or use the shortcut:
+
+```bash
+archkit g
+```
+
+**CLI Command Flags:**
+```bash
+# Target a specific feature folder
+archkit generate --path lib/features/weather
+# or
+archkit g -p lib/features/weather
+
+# Preview changes without modifying files
+archkit g --dry-run
+```
+
+**What gets generated automatically?**
+- **Clean Architecture**:
+  - `domain/usecases/fetch_weather_usecase.dart` (Strongly typed UseCase class)
+  - `domain/repositories/weather_repository.dart` (Repository interface method)
+  - `data/repositories/weather_repository_impl.dart` (Repository implementation)
+  - `data/data_sources/weather_remote_datasource.dart` (DataSource contract)
+  - `data/data_sources/weather_remote_datasource_impl.dart` (Dio network implementation with endpoint & HTTP method)
+- **MVVM Architecture**:
+  - `services/weather_service.dart` (Service interface & Dio implementation)
+- **MVC Architecture**:
+  - `controllers/weather_controller.dart` & `providers/weather_provider.dart`
+
+---
+
+### 6. Multi-Flavor Setup (`setup_flavor`)
 
 Generate a sample `flavor.yaml` automatically:
 

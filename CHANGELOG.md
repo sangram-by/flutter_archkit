@@ -1,3 +1,17 @@
+## 0.2.0
+
+* **`@Archkit` Presentation-to-Data Code Generator (`archkit generate` / `archkit g` / `archkit gen` / `archkit -g`)**:
+  * Added automated Clean Architecture cascading method generator across Domain and Data layers:
+    * Automatically generates UseCases (`lib/features/<name>/domain/usecases/`), Repositories (`domain/repositories/` & `data/repositories/`), and DataSources (`data/data_sources/`) from `@Archkit` or `@archkit` annotated methods in presentation controllers, BLoCs, Cubits, Riverpod providers, or ViewModels.
+    * Added cascading method generation for MVVM (`lib/services/`) and MVC (`lib/controllers/` & `lib/providers/`) architectures.
+  * Added `@Archkit` annotation (`package:flutter_archkit/flutter_archkit.dart`) with metadata parameters:
+    * `endpoint`: Target API endpoint path (e.g. `'/weather'`, `'/users'`).
+    * `method`: HTTP request method (`'GET'`, `'POST'`, `'PUT'`, `'DELETE'`, `'PATCH'`).
+    * `returnType`: Inner generic type for `ApiResponse<T>` (e.g. `User`, `List<Product>`).
+  * Intelligent signature forwarding for method arguments (positional and required named parameters) across all architectural tiers.
+  * Added `--dry-run` flag to preview proposed method injections and target files without modifying disk.
+  * Added target path selector via `--path` / `-p` option, positional arguments, or interactive CLI prompt.
+
 ## 0.1.0
 
 * **Route Setup Generator (`archkit route` / `archkit r` / `archkit setup-route`)**:
