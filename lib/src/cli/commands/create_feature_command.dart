@@ -32,6 +32,7 @@ class CreateFeatureCommand extends Command<int> {
       ..addOption('name', abbr: 'n', help: 'Feature name (e.g. auth, profile)')
       ..addOption('architecture', abbr: 'a', help: 'Architecture (Clean, MVVM, MVC)')
       ..addOption('state-management', abbr: 's', help: 'State management (Bloc, Cubit, Riverpod, Provider, GetX)')
+      ..addOption('path', abbr: 'p', help: 'Target project path')
       ..addFlag('di', help: 'Enable Dependency Injection (GetIt + Injectable)', defaultsTo: false);
   }
 
@@ -134,7 +135,7 @@ class CreateFeatureCommand extends Command<int> {
       useDi: useDi,
     );
 
-    final projectPath = Directory.current.path;
+    final projectPath = (argResults?['path'] as String?) ?? Directory.current.path;
     final progress = logger.progress('Generating feature \'$featureName\'...');
 
     await _pubspecModifier.addDependencies(projectPath, stateManagement);

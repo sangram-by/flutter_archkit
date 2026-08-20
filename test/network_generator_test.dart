@@ -51,6 +51,7 @@ dependencies:
       expect(dioNetworkFile.existsSync(), isTrue);
       expect(dioNetworkFile.readAsStringSync(),
           contains('package:test_app/core/util/api_response.dart'));
+      expect(dioNetworkFile.readAsStringSync(), contains("import 'dio.dart';"));
 
       final pubspecFile = File(p.join(tempDir.path, 'pubspec.yaml'));
       expect(pubspecFile.readAsStringSync(), contains('dio: ^5.4.3'));

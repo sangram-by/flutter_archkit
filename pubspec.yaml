@@ -1,6 +1,6 @@
 name: flutter_archkit
 description: An automated Flutter architecture generator (Clean, MVVM, MVC with Bloc, Cubit, Riverpod, Provider, GetX), feature module generator, and multi-flavor CLI configuration tool.
-version: 0.2.0
+version: 0.2.1
 homepage: https://github.com/Sangramdeve/flutter_archkit
 repository: https://github.com/Sangramdeve/flutter_archkit
 issue_tracker: https://github.com/Sangramdeve/flutter_archkit/issues

@@ -1,3 +1,12 @@
+## 0.2.1
+
+* **Bug Fixes & Generator Enhancements (`archkit generate`)**:
+  * Fixed regex method detection to parse Riverpod providers, top-level variable declarations, and `StateNotifier` / `Notifier` class methods.
+  * Added automatic injection of `final DioNetwork api = DioNetwork();` and required Dio imports into `RemoteDataSourceImpl` classes when missing during code generation.
+  * Updated `CleanRiverpodTemplate` to generate structured `StateNotifier` classes (`StateNotifier<AsyncValue<String>>`) with `StateNotifierProvider`, ensuring state management consistency across Bloc, Cubit, GetX, Provider, and Riverpod.
+  * Added `--path` / `-p` option to `archkit feature` command to allow target project directory specification.
+  * Preserved clean architecture method signature forwarding for positional and required named parameters across all tiers.
+
 ## 0.2.0
 
 * **`@Archkit` Presentation-to-Data Code Generator (`archkit generate` / `archkit g` / `archkit gen` / `archkit -g`)**:

@@ -95,7 +95,7 @@ Add `flutter_archkit` to your Flutter project's `pubspec.yaml` under `dev_depend
 
 ```yaml
 dev_dependencies:
-  flutter_archkit: ^0.2.0
+  flutter_archkit: ^0.2.1
 ```
 
 Then run:
