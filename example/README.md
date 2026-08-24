@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Sangramdeve/flutter_archkit/main/cover.svg" alt="Flutter ArchKit Logo" width="100%" />
+  <img src="https://raw.githubusercontent.com/Sangramdeve/flutter_archkit/master/cover.svg" alt="Flutter ArchKit Logo" width="100%" />
 </p>
 
 # Flutter ArchKit Architecture Example App
