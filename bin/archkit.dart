@@ -12,6 +12,8 @@ Future<void> main(List<String> rawArguments) async {
       arguments[0] = 'route';
     } else if (first == '-n' || first == '--network') {
       arguments[0] = 'network';
+    } else if (first == '-g' || first == '-gen' || first == '--generate') {
+      arguments[0] = 'generate';
     } else if (first == '-s' || first == '--storage') {
       arguments[0] = 'storage';
     }

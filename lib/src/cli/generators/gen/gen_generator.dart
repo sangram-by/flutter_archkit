@@ -49,8 +49,10 @@ class ArchkitMetadata {
 
   String get paramSignature {
     if (params.isEmpty) return '';
-    final positional =
-        params.where((p) => !p.isNamed).map((p) => '${p.type} ${p.name}').toList();
+    final positional = params
+        .where((p) => !p.isNamed)
+        .map((p) => '${p.type} ${p.name}')
+        .toList();
     final named = params
         .where((p) => p.isNamed)
         .map((p) => 'required ${p.type} ${p.name}')
@@ -69,8 +71,10 @@ class ArchkitMetadata {
     if (params.isEmpty) return '';
     final positional =
         params.where((p) => !p.isNamed).map((p) => p.name).toList();
-    final named =
-        params.where((p) => p.isNamed).map((p) => '${p.name}: ${p.name}').toList();
+    final named = params
+        .where((p) => p.isNamed)
+        .map((p) => '${p.name}: ${p.name}')
+        .toList();
 
     if (positional.isNotEmpty && named.isNotEmpty) {
       return '${positional.join(', ')}, ${named.join(', ')}';
@@ -115,7 +119,8 @@ class GenGenerator {
           final endpointMatch =
               RegExp(r'''endpoint\s*:\s*['"]([^'"]+)['"]''').firstMatch(line);
           final returnTypeMatch =
-              RegExp(r'''returnType\s*:\s*['"]?([^,'"\s\)]+)['"]?''').firstMatch(line);
+              RegExp(r'''returnType\s*:\s*['"]?([^,'"\s\)]+)['"]?''')
+                  .firstMatch(line);
           final httpMethodMatch =
               RegExp(r'''method\s*:\s*['"]([^'"]+)['"]''').firstMatch(line);
 
@@ -131,8 +136,16 @@ class GenGenerator {
           }
           if (nextIdx < lines.length) {
             final methodLine = lines[nextIdx].trim();
-            final methodMatch =
-                RegExp(r'\b([a-zA-Z_]\w*)\s*\(').firstMatch(methodLine);
+            RegExpMatch? methodMatch;
+            final varMatch = RegExp(r'^(?:final|const|var)\s+([a-zA-Z_]\w*)')
+                .firstMatch(methodLine);
+            if (varMatch != null) {
+              methodMatch = varMatch;
+            } else {
+              methodMatch =
+                  RegExp(r'\b([a-zA-Z_]\w*)\s*\(').firstMatch(methodLine);
+            }
+
             if (methodMatch != null) {
               final rawName = methodMatch.group(1)!;
 
@@ -144,11 +157,13 @@ class GenGenerator {
                   bodyIdx++) {
                 final bodyLine = lines[bodyIdx];
                 final callMatch = RegExp(
-                        r'(?:useCase|[a-zA-Z_]\w*[uU]se[cC]ase|service|[a-zA-Z_]\w*[sS]ervice|provider|[a-zA-Z_]\w*[pP]rovider|repository|[a-zA-Z_]\w*[rR]epository)\.([a-zA-Z_]\w*)\s*\(([^)]*)\)')
+                        r'(?:useCase|[a-zA-Z_]\w*[uU]se[cC]ase|service|[a-zA-Z_]\w*[sS]ervice|provider|[a-zA-Z_]\w*[pP]rovider|repository|[a-zA-Z_]\w*[rR]epository)(?:\.([a-zA-Z_]\w*))?\s*\(([^)]*)\)')
                     .firstMatch(bodyLine);
                 if (callMatch != null) {
-                  final calledName = callMatch.group(1)!;
-                  if (calledName != 'call') {
+                  final calledName = callMatch.group(1);
+                  if (calledName != null &&
+                      calledName != 'call' &&
+                      calledName.isNotEmpty) {
                     targetMethodName = calledName;
                   }
 
@@ -216,7 +231,8 @@ class GenGenerator {
         excludeImpl: true);
     final repoImplFiles =
         _findTargetFiles(actualFeatureDir, '_repository_impl.dart');
-    final dsFiles = _findTargetFiles(actualFeatureDir, '_remote_datasource.dart',
+    final dsFiles = _findTargetFiles(
+        actualFeatureDir, '_remote_datasource.dart',
         excludeImpl: true);
     final dsImplFiles =
         _findTargetFiles(actualFeatureDir, '_remote_datasource_impl.dart');
@@ -331,6 +347,8 @@ class GenGenerator {
 
     if (name.endsWith('Event')) {
       name = name.substring(0, name.length - 5);
+    } else if (name.endsWith('Provider')) {
+      name = name.substring(0, name.length - 8);
     }
 
     if (name.isEmpty) return 'getData';
@@ -670,12 +688,26 @@ class GenGenerator {
   }
 
   String _ensureDioNetworkImport(String content, String? packageName) {
-    if (content.contains('dio_network.dart')) return content;
-    final importStr = packageName != null
-        ? "import 'package:$packageName/core/network/dio_network.dart';\n"
-        : "import '../../core/network/dio_network.dart';\n";
+    var result = content;
+    if (!result.contains('dio_network.dart')) {
+      final importStr = packageName != null
+          ? "import 'package:$packageName/core/network/dio_network.dart';\n"
+          : "import '../../core/network/dio_network.dart';\n";
+      result = importStr + result;
+    }
 
-    return importStr + content;
+    if (!result.contains('final DioNetwork api') &&
+        !result.contains('DioNetwork api') &&
+        !result.contains('final api')) {
+      final classMatch = RegExp(r'class\s+\w+[^{]*\{').firstMatch(result);
+      if (classMatch != null) {
+        final insertPos = classMatch.end;
+        result =
+            '${result.substring(0, insertPos)}\n  final DioNetwork api = DioNetwork();${result.substring(insertPos)}';
+      }
+    }
+
+    return result;
   }
 
   String _ensureReturnTypeImport(

@@ -235,7 +235,6 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:$packageName/core/util/api_response.dart';
 import 'package:$packageName/core/util/typedefs.dart';
-import 'api_exception.dart';
 
 class DioService {
   final Dio _dio;
@@ -364,6 +363,7 @@ import 'package:$packageName/core/util/api_response.dart';
 import 'package:$packageName/core/util/typedefs.dart';
 import 'api_exception.dart';
 import 'api_interface.dart';
+import 'dio.dart';
 import 'dio_services.dart';
 
 class DioNetwork implements ApiInterface {

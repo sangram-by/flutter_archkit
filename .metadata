@@ -10,4 +10,4 @@ version:
 project_type: package
 archkit:
   architecture: Clean
-  state_management: Bloc
+  state_management: Riverpod
