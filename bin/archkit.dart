@@ -16,6 +16,8 @@ Future<void> main(List<String> rawArguments) async {
       arguments[0] = 'generate';
     } else if (first == '-s' || first == '--storage') {
       arguments[0] = 'storage';
+    } else if (first == '-fl' || first == '--flavor') {
+      arguments[0] = 'flavor';
     }
   }
 

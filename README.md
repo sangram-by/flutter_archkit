@@ -44,7 +44,7 @@ Whether starting a greenfield project or scaling an existing production codebase
   - [3. Setting Up Route Systems (`archkit route`)](#3-setting-up-route-systems-archkit-route)
   - [4. Generating Network Layer (`archkit network`)](#4-generating-network-layer-archkit-network)
   - [5. `@Archkit` Code Generation (`archkit generate`)](#5-smart-archkit-code-generation-archkit-generate)
-  - [6. Multi-Flavor Configuration (`setup_flavor`)](#6-multi-flavor-configuration-setup_flavor)
+  - [6. Multi-Flavor Configuration (`archkit flavor`)](#6-multi-flavor-configuration-archkit-flavor)
 - [Directory Structures](#-directory-structures)
 - [Example Application](#-example-application)
 - [Contributing & Issues](#-contributing--issues)
@@ -75,7 +75,7 @@ Whether starting a greenfield project or scaling an existing production codebase
 | `archkit route` | `-r`, `--route` | Scaffolds routing system & installs router dependencies | `archkit route -t "Go Router" --shell` |
 | `archkit network` | `-n`, `--network` | Scaffolds production Dio HTTP network layer | `archkit network --override` |
 | `archkit generate` | `g`, `gen`, `-g` | Generates domain & data layer methods for `@Archkit` annotations | `archkit g -p lib/features/auth` |
-| `setup_flavor` | `setup_flavor` | Configures multi-flavor environments (Android, iOS, Dart, IDEs) | `dart run flutter_archkit:setup_flavor` |
+| `archkit flavor` | `-fl`, `--flavor` | Configures multi-flavor environments (Android, iOS, Dart, IDEs) | `archkit flavor --init` or `archkit -fl` |
 
 ---
 
@@ -295,12 +295,19 @@ graph LR
 
 ---
 
-### 6. Multi-Flavor Configuration (`setup_flavor`)
+### 6. Multi-Flavor Configuration (`archkit flavor`)
 
 Easily configure enterprise-grade multi-environment setups (e.g. `dev`, `staging`, `prod`) for both Android and iOS in seconds.
 
 #### Step 1: Initialize `flavor.yaml`
 ```bash
+# Global CLI command
+archkit flavor --init
+
+# Or shortcut
+archkit -fl --init
+
+# Or via Dart run
 dart run flutter_archkit:setup_flavor --init
 ```
 
@@ -329,11 +336,15 @@ flavors:
 
 #### Step 2: Validate Configuration
 ```bash
+archkit flavor --validate
+# Or via Dart run
 dart run flutter_archkit:setup_flavor --validate
 ```
 
 #### Step 3: Run the Flavor Generator
 ```bash
+archkit flavor
+# Or via Dart run
 dart run flutter_archkit:setup_flavor
 ```
 

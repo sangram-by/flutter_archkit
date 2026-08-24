@@ -86,6 +86,10 @@ flavors:
 To run the flavor generator and configure native Android, iOS, IDE configurations, and `ServerConfig`:
 
 ```bash
+# Global CLI command
+archkit flavor
+
+# Or via Dart run
 dart run flutter_archkit:setup_flavor
 ```
 
