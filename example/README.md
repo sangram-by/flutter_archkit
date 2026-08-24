@@ -1,4 +1,8 @@
-# Flutter ArchKit Example
+<p align="center">
+  <img src="../cover.svg" alt="Flutter ArchKit Logo" width="100%" />
+</p>
+
+<h1 align="center">Flutter ArchKit Example</h1>
 
 This directory demonstrates how to configure and run `flutter_archkit` in a Flutter application.
 

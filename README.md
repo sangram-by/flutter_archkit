@@ -1,9 +1,17 @@
-# Flutter ArchKit
+<p align="center">
+  <img src="cover.svg" alt="Flutter ArchKit Logo" width="100%" />
+</p>
 
-[![pub package](https://img.shields.io/pub/v/flutter_archkit.svg)](https://pub.dev/packages/flutter_archkit)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <a href="https://pub.dev/packages/flutter_archkit"><img src="https://img.shields.io/pub/v/flutter_archkit.svg" alt="pub package"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+</p>
 
-A comprehensive Flutter Architecture CLI generator and multi-flavor configuration tool. `flutter_archkit` automates scaffolding Flutter projects with Clean, MVVM, or MVC architecture, state management (Bloc, Cubit, Riverpod, Provider, GetX), modular feature generators, routing setup, network layer generation, and multi-flavor environment configurations.
+<h1 align="center">Flutter ArchKit</h1>
+
+<p align="center">
+  A comprehensive Flutter Architecture CLI generator and multi-flavor configuration tool. <code>flutter_archkit</code> automates scaffolding Flutter projects with Clean, MVVM, or MVC architecture, state management (Bloc, Cubit, Riverpod, Provider, GetX), modular feature generators, routing setup, network layer generation, and multi-flavor environment configurations.
+</p>
 
 ---
 
