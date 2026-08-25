@@ -25,7 +25,7 @@
 
 Whether starting a greenfield project or scaling an existing production codebase, `flutter_archkit` automates:
 - 🏗️ **Project Scaffolding**: Interactive wizard for Clean Architecture, MVVM, or MVC.
-- ⚡ **Feature Modules**: One-command feature generator that matches your project's architecture and state management.
+- ⚡ **Feature Modules**: One-command feature generator matching your project's architecture and state management.
 - 🧠 **`@Archkit` Code Generation**: Automatically writes cascading UseCases, Repositories, DataSources, and API calls from annotated presentation handlers.
 - 🛣️ **Router Infrastructure**: Scaffolds Navigator 1.0/2.0, Go Router (with Bottom Navigation Shells), Auto Route, or GetX Routing.
 - 🌐 **Network Layer**: Scaffolds production Dio HTTP client with generic `ApiResponse<T>`, custom `ApiException`, interceptors, and typed contracts.
@@ -33,8 +33,25 @@ Whether starting a greenfield project or scaling an existing production codebase
 
 ---
 
+## 📚 Documentation Guides & Topics
+
+Explore dedicated, in-depth documentation guides for each architecture pattern and feature:
+
+| Topic / Guide | Description |
+| :--- | :--- |
+| 🏗️ **[Clean Architecture Guide](doc/clean_architecture.md)** | Deep dive into Data, Domain, Presentation, & DI layers with BLoC, Cubit, Riverpod, Provider, & GetX. |
+| 🎨 **[MVVM Architecture Guide](doc/mvvm_architecture.md)** | Deep dive into Models, Services, ViewModels, Views, and reactive state management integration. |
+| 🏛️ **[MVC Architecture Guide](doc/mvc_architecture.md)** | Deep dive into Models, Controllers, Views, and lightweight action dispatching. |
+| 🧠 **[`@Archkit` Code Generator Guide](doc/code_generation.md)** | Complete guide on annotating presentation handlers and cascading methods across domain/data layers. |
+| 🛣️ **[Route Systems Guide](doc/routing.md)** | Comprehensive setup for Go Router (with Bottom Nav Shell), Auto Route, GetX Routing, Navigator 1.0/2.0. |
+| 🌐 **[Production Network Layer Guide](doc/networking.md)** | Detailed guide for Dio HTTP client, `ApiResponse<T>`, `ApiException`, and interceptors. |
+| 🎯 **[Multi-Flavor Setup Guide](doc/multi_flavor.md)** | Complete guide for `archkit flavor`, `flavor.yaml`, Android Gradle, iOS Xcode schemes, & IDE run targets. |
+
+---
+
 ## 📑 Table of Contents
 
+- [Documentation Guides & Topics](#-documentation-guides--topics)
 - [Features & Architecture Matrix](#-features--architecture-matrix)
 - [CLI Command Cheat Sheet](#-cli-command-cheat-sheet)
 - [Installation](#-installation)
@@ -187,20 +204,6 @@ archkit r
 4. **`Auto Route`**: Type-safe code-generated navigation.
 5. **`GetX Routing`**: Lightweight `GetPage` navigation.
 
-#### CLI Command Flags:
-```bash
-# Go Router with Bottom Navigation Shell
-archkit route --type "Go Router" --shell
-
-# Auto Route setup
-archkit route -t auto_route
-
-# GetX Routing setup
-archkit route -t getx
-```
-
-*Note: Running `archkit route` automatically adds the required package dependencies to `pubspec.yaml` and persists your configuration in `.metadata`.*
-
 ---
 
 ### 4. Generating Network Layer (`archkit network`)
@@ -212,24 +215,6 @@ archkit network
 # Or alias
 archkit n
 ```
-
-#### CLI Options:
-```bash
-# Specify custom project path
-archkit network --path ./my_project
-
-# Force overwrite existing network files
-archkit network --override
-```
-
-#### What gets scaffolded?
-- **`ApiResponse<T>`**: Standardized response wrapper representing `Success`, `Error`, and `Loading` states.
-- **`ApiException`**: Centralized exception handler parsing HTTP status codes, validation errors, and timeout exceptions.
-- **`ApiInterface`**: Abstract contract for GET, POST, PUT, DELETE, and PATCH methods.
-- **`DioNetwork` & `DioServices`**: Configured Dio instance with base URLs, headers, connection timeouts, and SSL pinning hooks.
-- **Interceptors**:
-  - `ApiInterceptor`: Automatic bearer token injection and authentication headers.
-  - `LoggingInterceptor`: Detailed console request/response logging in debug mode.
 
 ---
 
@@ -277,173 +262,30 @@ archkit g -p lib/features/weather
 archkit g -p lib/features/weather --dry-run
 ```
 
-#### Automated Generation Pipeline:
-```mermaid
-graph LR
-    A["@Archkit Annotation in Presentation"] --> B["UseCase (Domain)"]
-    B --> C["Repository Interface (Domain)"]
-    C --> D["Repository Implementation (Data)"]
-    D --> E["Remote DataSource Contract (Data)"]
-    E --> F["Remote DataSource Impl (Dio Client)"]
-```
-
-- **`domain/usecases/fetch_weather_usecase.dart`**: Generates typed UseCase with matching parameters (`city`, `units`).
-- **`domain/repositories/weather_repository.dart`**: Injects contract method returning `Future<ApiResponse<WeatherModel>>`.
-- **`data/repositories/weather_repository_impl.dart`**: Implements method delegating to the remote data source.
-- **`data/data_sources/weather_remote_datasource.dart`**: Declares data source method.
-- **`data/data_sources/weather_remote_datasource_impl.dart`**: Generates concrete Dio network call with `/weather` endpoint and `GET` method.
-
 ---
 
 ### 6. Multi-Flavor Configuration (`archkit flavor`)
 
 Easily configure enterprise-grade multi-environment setups (e.g. `dev`, `staging`, `prod`) for both Android and iOS in seconds.
 
-#### Step 1: Initialize `flavor.yaml`
 ```bash
-# Global CLI command
+# Initialize flavor.yaml template
 archkit flavor --init
 
-# Or shortcut
-archkit -fl --init
-
-# Or via Dart run
-dart run flutter_archkit:setup_flavor --init
-```
-
-Customize `flavor.yaml` in your project root:
-
-```yaml
-flavors:
-  dev:
-    app:
-      name: "App [DEV]"
-      baseUrl: "https://dev-api.example.com"
-    android:
-      applicationId: "com.example.app.dev"
-    ios:
-      bundleId: "com.example.app.dev"
-
-  prod:
-    app:
-      name: "App"
-      baseUrl: "https://api.example.com"
-    android:
-      applicationId: "com.example.app"
-    ios:
-      bundleId: "com.example.app"
-```
-
-#### Step 2: Validate Configuration
-```bash
+# Validate syntax
 archkit flavor --validate
-# Or via Dart run
-dart run flutter_archkit:setup_flavor --validate
-```
 
-#### Step 3: Run the Flavor Generator
-```bash
+# Generate Android, iOS, Dart, and IDE flavor files
 archkit flavor
-# Or via Dart run
-dart run flutter_archkit:setup_flavor
 ```
-
-#### Automated Native & IDE Setup:
-- **Android**: Configures `productFlavors` and `applicationId` in `android/app/flavor.gradle.kts` and links with `build.gradle.kts`.
-- **iOS**: 
-  - Generates `.xcconfig` build configuration files (`Debug-dev.xcconfig`, `Release-prod.xcconfig`, etc.).
-  - Configures CocoaPods target integrations (`#include? "Pods-Runner.<mode>-<flavor>.xcconfig"`).
-  - Generates shared `.xcscheme` scheme definitions in `Runner.xcodeproj/xcshareddata/xcschemes/`.
-  - Patches `Info.plist` with dynamic `CFBundleDisplayName` and `BaseURL`.
-  - Updates Xcode `project.pbxproj` and upgrades `IPHONEOS_DEPLOYMENT_TARGET = 16.0`.
-- **Dart ServerConfig**: Generates strongly-typed `lib/core/config/server_config.dart`.
-- **IDE Run Configurations**:
-  - Writes `.vscode/launch.json` for 1-click debugging in VS Code.
-  - Generates `.run/<flavor>.run.xml` for Android Studio / IntelliJ IDEA.
 
 ---
 
 ## 📁 Directory Structures
 
-### Clean Architecture (`lib/features/auth/`)
-```text
-lib/features/auth/
-├── data/
-│   ├── data_sources/
-│   │   ├── auth_remote_datasource.dart
-│   │   └── auth_remote_datasource_impl.dart
-│   ├── models/
-│   │   └── auth_model.dart
-│   └── repositories/
-│       └── auth_repository_impl.dart
-├── di/
-│   ├── auth_di.dart
-│   └── auth_di.config.dart
-├── domain/
-│   ├── entities/
-│   │   └── auth_entity.dart
-│   ├── repositories/
-│   │   └── auth_repository.dart
-│   └── usecases/
-│       └── auth_usecase.dart
-└── presentation/
-    ├── bloc/ (or cubit / riverpod / provider / controllers)
-    │   ├── auth_bloc.dart
-    │   ├── auth_event.dart
-    │   └── auth_state.dart
-    └── page/
-        └── auth_page.dart
-```
-
-### Route System Structure (`lib/core/router/`)
-```text
-lib/core/router/
-├── app_router.dart           # Central router definition (GoRouter / RouterDelegate / AppPages)
-├── app_routes.dart           # Strongly-typed route name constants
-├── route_functions.dart      # Global navigation utilities (push, pop, clearAndGo)
-└── bottom_shell_route.dart   # StatefulShellRoute bottom navigation scaffold (Go Router)
-```
-
-### Network Layer Structure (`lib/core/`)
-```text
-lib/core/
-├── network/
-│   ├── api_exception.dart             # Typed HTTP & socket exception handling
-│   ├── api_interface.dart             # Abstract API client contract
-│   ├── dio.dart                       # Configured Dio HTTP factory instance
-│   ├── dio_network.dart               # Concrete Dio HTTP request dispatcher
-│   ├── dio_services.dart              # Base network service class
-│   └── interceptors/
-│       ├── api_interceptor.dart       # Bearer token & authorization header interceptor
-│       └── logging.dart               # Colored request/response logger interceptor
-└── util/
-    ├── api_response.dart              # Generic ApiResponse<T> state wrapper
-    └── typedefs.dart                  # Utility Dart typedefs (JSON, Callbacks)
-```
-
-### MVVM Architecture (`lib/`)
-```text
-lib/
-├── models/
-│   └── user_model.dart
-├── services/
-│   └── user_service.dart
-├── viewmodels/
-│   └── user_viewmodel.dart (or user_provider.dart / user_bloc.dart)
-└── views/
-    └── user_view.dart
-```
-
-### MVC Architecture (`lib/`)
-```text
-lib/
-├── models/
-│   └── user_model.dart
-├── controllers/
-│   └── user_controller.dart
-└── views/
-    └── user_view.dart
-```
+- 🏗️ **Clean Architecture Details**: [doc/clean_architecture.md](doc/clean_architecture.md)
+- 🎨 **MVVM Architecture Details**: [doc/mvvm_architecture.md](doc/mvvm_architecture.md)
+- 🏛️ **MVC Architecture Details**: [doc/mvc_architecture.md](doc/mvc_architecture.md)
 
 ---
 
