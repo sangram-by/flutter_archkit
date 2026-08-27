@@ -81,28 +81,63 @@ productFlavors {
 
 ---
 
-### 3. Strongly Typed Dart Configuration (`lib/core/config/server_config.dart`)
+### 3. Strongly Typed Dart Configuration & `lib/main.dart` Initialization
+
+`archkit flavor` generates `lib/core/config/server_config.dart` and automatically updates `lib/main.dart` so `main()` is `async`, calls `WidgetsFlutterBinding.ensureInitialized()`, and initializes `ServerConfig()` based on the active `appFlavor`:
+
 ```dart
-enum Flavor { dev, prod }
+// lib/core/config/server_config.dart
+import 'dart:developer';
+import 'package:flutter/services.dart';
+
+enum ServerEnvironment { dev, prod }
 
 class ServerConfig {
-  static late Flavor currentFlavor;
-  static late String baseUrl;
-  static late String appName;
+  static final ServerConfig _instance = ServerConfig._internal();
+  ServerEnvironment _currentEnv = ServerEnvironment.dev;
 
-  static void setFlavor(Flavor flavor) {
-    currentFlavor = flavor;
+  factory ServerConfig() => _instance;
+  ServerConfig._internal();
+
+  Future<void> init() async {
+    final flavor = appFlavor;
     switch (flavor) {
-      case Flavor.dev:
-        baseUrl = 'https://dev-api.example.com';
-        appName = 'App [DEV]';
+      case 'dev':
+        _currentEnv = ServerEnvironment.dev;
         break;
-      case Flavor.prod:
-        baseUrl = 'https://api.example.com';
-        appName = 'App';
+      case 'prod':
+        _currentEnv = ServerEnvironment.prod;
         break;
+      default:
+        _currentEnv = ServerEnvironment.dev;
+    }
+    log('ServerConfig initialized with environment: ${_currentEnv.name} (flavor: $flavor)');
+  }
+
+  ServerEnvironment get currentEnv => _currentEnv;
+  String get baseUrl {
+    switch (_currentEnv) {
+      case ServerEnvironment.dev:
+        return 'https://dev-api.example.com';
+      case ServerEnvironment.prod:
+        return 'https://api.example.com';
     }
   }
+}
+```
+
+```dart
+// lib/main.dart (Auto-updated by `archkit flavor`)
+import 'package:flutter/material.dart';
+import 'core/config/server_config.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final serverConfig = ServerConfig();
+  await serverConfig.init();
+
+  runApp(const MyApp());
 }
 ```
 
@@ -111,3 +146,4 @@ class ServerConfig {
 ### 4. IDE 1-Click Run Configurations
 - **VS Code**: Scaffolds `.vscode/launch.json` for 1-click target debugging.
 - **Android Studio / IntelliJ**: Scaffolds `.run/<flavor>.run.xml` run configurations.
+
