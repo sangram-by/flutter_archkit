@@ -358,4 +358,41 @@ flavors:
       },
     );
   });
+
+  test('updates main.dart to async with WidgetsBinding & ServerConfig init',
+      () async {
+    final mainFile = File('${tempDir.path}/lib/main.dart');
+    await mainFile.parent.create(recursive: true);
+    await mainFile.writeAsString('''
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+''');
+
+    final flavors = [
+      FlavorConfig(
+        name: 'dev',
+        appName: 'MyApp Dev',
+        applicationId: 'com.example.myapp.dev',
+        bundleId: 'com.example.myapp.dev',
+        baseUrl: 'https://dev.api.example.com',
+      ),
+    ];
+
+    final generator = FlavorGenerator(
+      flavors: flavors,
+      projectRoot: tempDir.path,
+    );
+
+    await generator.run();
+
+    final mainContent = await mainFile.readAsString();
+    expect(mainContent, contains("import 'core/config/server_config.dart';"));
+    expect(mainContent, contains("Future<void> main() async"));
+    expect(mainContent, contains("WidgetsFlutterBinding.ensureInitialized();"));
+    expect(mainContent, contains("final serverConfig = ServerConfig();"));
+    expect(mainContent, contains("await serverConfig.init();"));
+  });
 }
