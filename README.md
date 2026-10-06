@@ -45,6 +45,7 @@ Whether starting a greenfield project or scaling an existing production codebase
   - [4. Generating Network Layer (`archkit network`)](#4-generating-network-layer-archkit-network)
   - [5. `@Archkit` Code Generation (`archkit generate`)](#5-smart-archkit-code-generation-archkit-generate)
   - [6. Multi-Flavor Configuration (`archkit flavor`)](#6-multi-flavor-configuration-archkit-flavor)
+  - [7. App & Package Renamer (`archkit rename`)](#7-app--package-renamer-archkit-rename)
 - [Directory Structures](#-directory-structures)
 - [Example Application](#-example-application)
 - [Contributing & Issues](#-contributing--issues)
@@ -62,6 +63,7 @@ Whether starting a greenfield project or scaling an existing production codebase
 | **Networking** | **Dio 5.x**, Generic `ApiResponse<T>`, `ApiException`, Logging Interceptor, Auth Interceptors, `ApiInterface` contract |
 | **Code Generation** | **`@Archkit` annotation parser**: Cascading generation of UseCases, Repositories, Remote DataSources, and Service interfaces |
 | **Multi-Flavor** | **Android** (`flavor.gradle.kts`), **iOS** (XCConfig, Schemes, `project.pbxproj`), **Dart** (`ServerConfig`), **IDE Run Configs** (VS Code & Android Studio) |
+| **App & Package Renamer** | **All 6 Platforms**: Android, iOS, Web, macOS, Windows, Linux + automated conversion to `flavor.yaml` |
 | **Configuration** | **Smart `.metadata` tracking**: Auto-detects project architecture without passing repetitive flags |
 
 ---
@@ -76,6 +78,7 @@ Whether starting a greenfield project or scaling an existing production codebase
 | `archkit network` | `-n`, `--network` | Scaffolds production Dio HTTP network layer | `archkit network --override` |
 | `archkit generate` | `g`, `gen`, `-g` | Generates domain & data layer methods for `@Archkit` annotations | `archkit g -p lib/features/auth` |
 | `archkit flavor` | `-fl`, `--flavor` | Configures multi-flavor environments (Android, iOS, Dart, IDEs) | `archkit flavor --init` or `archkit -fl` |
+| `archkit rename` | `-rn`, `--rename` | Renames app name and package/bundle ID across all 6 platforms | `archkit rename --init` or `archkit rename` |
 
 ---
 
@@ -360,6 +363,80 @@ dart run flutter_archkit:setup_flavor
 - **IDE Run Configurations**:
   - Writes `.vscode/launch.json` for 1-click debugging in VS Code.
   - Generates `.run/<flavor>.run.xml` for Android Studio / IntelliJ IDEA.
+
+---
+
+### 7. App & Package Renamer (`archkit rename`)
+
+Quickly change the application display name and package / bundle identifier across all Flutter platforms (**Android, iOS, Web, macOS, Windows, Linux**), or convert your rename settings into a multi-flavor `flavor.yaml` setup.
+
+#### Step 1: Initialize `rename.yaml`
+```bash
+# Global CLI command
+archkit rename --init
+
+# Or shortcut
+archkit -rn --init
+
+# Or via Dart run
+dart run flutter_archkit:rename --init
+```
+
+This creates a sample `rename.yaml` at your project root:
+
+```yaml
+# flutter_archkit App & Package Rename Configuration
+app_name: "My Awesome App"
+package_name: "com.example.my_awesome_app"
+
+# Optional: Platform-specific overrides
+# android:
+#   app_name: "My Awesome App Android"
+#   package_name: "com.example.my_awesome_app"
+# ios:
+#   app_name: "My Awesome App iOS"
+#   bundle_id: "com.example.my_awesome_app"
+# web:
+#   app_name: "My Awesome App Web"
+#   description: "My Awesome App Web Application"
+# macos:
+#   app_name: "My Awesome App macOS"
+#   bundle_id: "com.example.my_awesome_app"
+# windows:
+#   app_name: "My Awesome App Windows"
+# linux:
+#   app_name: "My Awesome App Linux"
+#   package_name: "com.example.my_awesome_app"
+```
+
+#### Step 2: Apply the Rename Across All Platforms
+```bash
+archkit rename
+
+# Or via Dart run
+dart run flutter_archkit:rename
+```
+
+This automatically modifies:
+- **Android**: `android/app/build.gradle.kts` / `build.gradle` (`applicationId` & `namespace`), `AndroidManifest.xml` (`package` & `android:label`), `strings.xml`, `MainActivity.kt` / `MainActivity.java` package declaration, and moves the file to the new directory structure.
+- **iOS**: `ios/Runner/Info.plist` (`CFBundleDisplayName`, `CFBundleName`) and `ios/Runner.xcodeproj/project.pbxproj` (`PRODUCT_BUNDLE_IDENTIFIER`).
+- **Web**: `web/index.html` (`<title>` & `<meta name="apple-mobile-web-app-title">`) and `web/manifest.json`.
+- **macOS**: `macos/Runner/Configs/AppInfo.xcconfig` (`PRODUCT_NAME` & `PRODUCT_BUNDLE_IDENTIFIER`), `Info.plist`, and `project.pbxproj`.
+- **Windows**: `windows/runner/Runner.rc` (`FileDescription`, `InternalName`, `ProductName`) and `windows/runner/main.cpp`.
+- **Linux**: `linux/my_application.cc` (`gtk_header_bar_set_title`, `gtk_window_set_title`) and `linux/CMakeLists.txt` (`APPLICATION_ID`).
+
+#### Step 3: Transition to Multi-Flavor Environments (`archkit flavor --init`)
+If you decide to enable multi-flavor environments later, simply run:
+
+```bash
+archkit flavor --init
+# Or via Dart run
+dart run flutter_archkit:setup_flavor --init
+```
+
+`flutter_archkit` will **automatically detect** your existing `rename.yaml` (or `rename.yml`), generate a `flavor.yaml` pre-configured with `dev` and `prod` environments matching your desired app and package names, and **automatically remove `rename.yaml`**.
+
+From then on, `flavor.yaml` is your single source of truth for all app names, bundle IDs, and multi-environment configurations!
 
 ---
 

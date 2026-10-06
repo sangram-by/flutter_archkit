@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:flutter_archkit/src/flavor/flavor_generator.dart';
 import 'package:flutter_archkit/src/flavor/parser/flavor_exceptions.dart';
 import 'package:flutter_archkit/src/flavor/parser/flavor_yaml_loader.dart';
+import 'package:flutter_archkit/src/rename/rename_to_flavor_converter.dart';
 
 class FlavorCommand extends Command<int> {
   @override
@@ -48,14 +49,37 @@ class FlavorCommand extends Command<int> {
 
     final isInit = argResults?['init'] as bool? ?? false;
     final configFile = argResults?['config'] as String? ?? 'flavor.yaml';
+    final flavorFile = File(p.join(projectPath, configFile));
+    final renameFileName = RenameToFlavorConverter.findRenameFileName(projectPath);
 
     if (isInit) {
-      final defaultFile = File(p.join(projectPath, configFile));
-      if (await defaultFile.exists()) {
+      if (renameFileName != null) {
+        try {
+          final converter = RenameToFlavorConverter(projectRoot: projectPath);
+          await converter.convertAndSave(
+            renameFileName: renameFileName,
+            flavorFileName: configFile,
+            overwrite: true,
+            deleteRenameFile: true,
+          );
+          logger.info(
+            '${lightGreen.wrap('✨')} Detected $renameFileName! Generated $configFile and removed $renameFileName.',
+          );
+          logger.info(
+            '👉 From now on, $configFile will manage all app name and environment configurations.',
+          );
+          return ExitCode.success.code;
+        } catch (e) {
+          logger.warn('⚠️ Failed to convert $renameFileName ($e), creating default template instead.');
+        }
+      }
+
+      if (await flavorFile.exists()) {
         logger.warn('⚠️ $configFile already exists at project root.');
         return ExitCode.success.code;
       }
-      await defaultFile.writeAsString('''flavors:
+
+      await flavorFile.writeAsString('''flavors:
   dev:
     app:
       name: "Example Dev"
@@ -76,6 +100,21 @@ class FlavorCommand extends Command<int> {
 ''');
       logger.info('${lightGreen.wrap('✨')} Created sample $configFile at project root.');
       return ExitCode.success.code;
+    }
+
+    if (!await flavorFile.exists() && renameFileName != null) {
+      try {
+        final converter = RenameToFlavorConverter(projectRoot: projectPath);
+        await converter.convertAndSave(
+          renameFileName: renameFileName,
+          flavorFileName: configFile,
+          overwrite: false,
+          deleteRenameFile: true,
+        );
+        logger.info(
+          '${lightGreen.wrap('🔄')} Detected $renameFileName! Converted to $configFile and removed $renameFileName.',
+        );
+      } catch (_) {}
     }
 
     final isValidate = argResults?['validate'] as bool? ?? false;

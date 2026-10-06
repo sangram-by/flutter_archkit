@@ -4,6 +4,7 @@ import 'package:flutter_archkit/src/cli/commands/create_feature_command.dart';
 import 'package:flutter_archkit/src/cli/commands/flavor_command.dart';
 import 'package:flutter_archkit/src/cli/commands/generate_command.dart';
 import 'package:flutter_archkit/src/cli/commands/network_command.dart';
+import 'package:flutter_archkit/src/cli/commands/rename_command.dart';
 import 'package:flutter_archkit/src/cli/commands/route_command.dart';
 
 class FlutterArchkitCommandRunner extends CommandRunner<int> {
@@ -15,5 +16,6 @@ class FlutterArchkitCommandRunner extends CommandRunner<int> {
     addCommand(NetworkCommand());
     addCommand(GenerateCommand());
     addCommand(FlavorCommand());
+    addCommand(RenameCommand());
   }
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_archkit/src/flavor/flavor_generator.dart';
 import 'package:flutter_archkit/src/flavor/parser/flavor_exceptions.dart';
 import 'package:flutter_archkit/src/flavor/parser/flavor_yaml_loader.dart';
+import 'package:flutter_archkit/src/rename/rename_to_flavor_converter.dart';
 
 /// Usage:
 ///   dart run flutter_archkit:setup_flavor
@@ -10,12 +11,39 @@ import 'package:flutter_archkit/src/flavor/parser/flavor_yaml_loader.dart';
 ///   dart run flutter_archkit:setup_flavor --validate
 ///   dart run flutter_archkit:setup_flavor --init
 Future<void> main(List<String> args) async {
+  final projectRoot = Directory.current.path;
+
+  final renameFileName = RenameToFlavorConverter.findRenameFileName(projectRoot);
+
   if (args.contains('--init')) {
     final defaultFile = File('flavor.yaml');
+
+    if (renameFileName != null) {
+      try {
+        final converter = RenameToFlavorConverter(projectRoot: projectRoot);
+        await converter.convertAndSave(
+          renameFileName: renameFileName,
+          flavorFileName: 'flavor.yaml',
+          overwrite: true,
+          deleteRenameFile: true,
+        );
+        stdout.writeln(
+          '✨ Detected $renameFileName! Generated flavor.yaml and removed $renameFileName at project root.',
+        );
+        stdout.writeln(
+          '👉 From now on, flavor.yaml will manage all app name and environment configurations.',
+        );
+        return;
+      } catch (e) {
+        stdout.writeln('⚠️ Failed to convert $renameFileName ($e), falling back to template.');
+      }
+    }
+
     if (await defaultFile.exists()) {
       stdout.writeln('⚠️ flavor.yaml already exists at project root.');
       return;
     }
+
     await defaultFile.writeAsString('''flavors:
   dev:
     app:
@@ -47,7 +75,19 @@ Future<void> main(List<String> args) async {
       ? configArg.split('=').last
       : 'flavor.yaml';
 
-  final projectRoot = Directory.current.path;
+  if (!await File(fileName).exists() && renameFileName != null) {
+    try {
+      final converter = RenameToFlavorConverter(projectRoot: projectRoot);
+      await converter.convertAndSave(
+        renameFileName: renameFileName,
+        flavorFileName: fileName,
+        overwrite: false,
+        deleteRenameFile: true,
+      );
+      stdout.writeln('🔄 Detected $renameFileName! Converted to $fileName and removed $renameFileName.');
+    } catch (_) {}
+  }
+
   final loader = FlavorYamlLoader(projectRoot: projectRoot, fileName: fileName);
 
   try {

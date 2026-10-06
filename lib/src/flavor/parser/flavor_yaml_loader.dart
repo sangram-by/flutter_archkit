@@ -30,10 +30,19 @@ class FlavorYamlLoader {
   /// Throws [FlavorYamlNotFoundException], [FlavorYamlEmptyException],
   /// or [FlavorYamlParseException] on failure.
   Future<List<FlavorConfig>> load() async {
-    final file = File(_path);
+    var file = File(_path);
 
     if (!await file.exists()) {
-      throw FlavorYamlNotFoundException(_path);
+      if (fileName == 'flavor.yaml') {
+        final ymlFile = File('$projectRoot/flavor.yml');
+        if (await ymlFile.exists()) {
+          file = ymlFile;
+        } else {
+          throw FlavorYamlNotFoundException(_path);
+        }
+      } else {
+        throw FlavorYamlNotFoundException(_path);
+      }
     }
 
     final raw = await file.readAsString();

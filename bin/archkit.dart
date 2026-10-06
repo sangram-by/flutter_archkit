@@ -18,6 +18,8 @@ Future<void> main(List<String> rawArguments) async {
       arguments[0] = 'storage';
     } else if (first == '-fl' || first == '--flavor') {
       arguments[0] = 'flavor';
+    } else if (first == '-rn' || first == '--rename') {
+      arguments[0] = 'rename';
     }
   }
 

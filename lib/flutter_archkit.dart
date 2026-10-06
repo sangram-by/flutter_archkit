@@ -4,4 +4,8 @@ export 'src/flavor/flavor_generator.dart';
 export 'src/flavor/parser/flavor_config.dart';
 export 'src/flavor/parser/flavor_exceptions.dart';
 export 'src/flavor/parser/flavor_yaml_loader.dart';
-
+export 'src/rename/parser/rename_config.dart';
+export 'src/rename/parser/rename_exceptions.dart';
+export 'src/rename/parser/rename_yaml_loader.dart';
+export 'src/rename/rename_generator.dart';
+export 'src/rename/rename_to_flavor_converter.dart';

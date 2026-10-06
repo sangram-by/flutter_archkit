@@ -1,3 +1,18 @@
+## 0.3.0
+
+* **Package & App Name Renamer (`archkit rename` / `archkit -rn` / `dart run flutter_archkit:rename`)**:
+  * Added automated cross-platform renaming for app display name and package/bundle identifier across all 6 platforms:
+    * **Android**: `android/app/build.gradle.kts`, `build.gradle`, `AndroidManifest.xml`, `strings.xml`, package statement in `MainActivity.kt` / `MainActivity.java`, and automatic directory hierarchy migration.
+    * **iOS**: `ios/Runner/Info.plist` (`CFBundleDisplayName`, `CFBundleName`) and `ios/Runner.xcodeproj/project.pbxproj` (`PRODUCT_BUNDLE_IDENTIFIER`).
+    * **Web**: `web/index.html` (`<title>`, `<meta apple-mobile-web-app-title>`) and `web/manifest.json`.
+    * **macOS**: `macos/Runner/Configs/AppInfo.xcconfig`, `Info.plist`, and `project.pbxproj`.
+    * **Windows**: `windows/runner/Runner.rc` and `windows/runner/main.cpp`.
+    * **Linux**: `linux/my_application.cc` and `linux/CMakeLists.txt`.
+  * Added `rename.yaml` configuration specification supporting global values and optional platform overrides.
+  * Added `--flavor` / `--to-flavor` flag to convert `rename.yaml` directly into multi-flavor `flavor.yaml` (`dev` & `prod` environments).
+  * Added auto-detection in `archkit flavor --init` and `setup_flavor` to detect existing `rename.yaml` and seamlessly prefill/convert it into `flavor.yaml`.
+  * Added direct executable `dart run flutter_archkit:rename`.
+
 ## 0.2.1
 
 * **Bug Fixes & Generator Enhancements (`archkit generate`)**:
