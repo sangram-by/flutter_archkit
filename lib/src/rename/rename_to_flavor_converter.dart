@@ -20,38 +20,56 @@ class RenameToFlavorConverter {
   }
 
   /// Converts a [RenameConfig] into a formatted `flavor.yaml` string.
+  /// Supports platform-specific app names for Android and iOS when present.
   static String convertToYamlString(RenameConfig config) {
-    final appName = config.appName ??
+    final baseAppName = config.appName ??
         config.androidAppName ??
         config.iosAppName ??
         'App';
-    final androidPkg = config.effectiveAndroidPackageName ??
-        config.packageName ??
-        'com.example.app';
-    final iosPkg = config.effectiveIosBundleId ??
-        config.packageName ??
-        'com.example.app';
 
-    return '''# Converted from rename configuration by flutter_archkit
-flavors:
-  dev:
-    app:
-      name: "$appName Dev"
-      baseUrl: "https://dev-api.example.com"
-    android:
-      applicationId: "$androidPkg.dev"
-    ios:
-      bundleId: "$iosPkg.dev"
+    final androidDevPkg =
+        '${config.effectiveAndroidPackageName ?? "com.example.app"}.dev';
+    final iosDevPkg =
+        '${config.effectiveIosBundleId ?? "com.example.app"}.dev';
+    final androidProdPkg =
+        config.effectiveAndroidPackageName ?? "com.example.app";
+    final iosProdPkg =
+        config.effectiveIosBundleId ?? "com.example.app";
 
-  prod:
-    app:
-      name: "$appName"
-      baseUrl: "https://api.example.com"
-    android:
-      applicationId: "$androidPkg"
-    ios:
-      bundleId: "$iosPkg"
-''';
+    final buffer = StringBuffer();
+    buffer.writeln('# Converted from rename configuration by flutter_archkit');
+    buffer.writeln('flavors:');
+    buffer.writeln('  dev:');
+    buffer.writeln('    app:');
+    buffer.writeln('      name: "$baseAppName Dev"');
+    buffer.writeln('      baseUrl: "https://dev-api.example.com"');
+    buffer.writeln('    android:');
+    buffer.writeln('      applicationId: "$androidDevPkg"');
+    if (config.androidAppName != null) {
+      buffer.writeln('      appName: "${config.androidAppName} Dev"');
+    }
+    buffer.writeln('    ios:');
+    buffer.writeln('      bundleId: "$iosDevPkg"');
+    if (config.iosAppName != null) {
+      buffer.writeln('      appName: "${config.iosAppName} Dev"');
+    }
+    buffer.writeln();
+    buffer.writeln('  prod:');
+    buffer.writeln('    app:');
+    buffer.writeln('      name: "$baseAppName"');
+    buffer.writeln('      baseUrl: "https://api.example.com"');
+    buffer.writeln('    android:');
+    buffer.writeln('      applicationId: "$androidProdPkg"');
+    if (config.androidAppName != null) {
+      buffer.writeln('      appName: "${config.androidAppName}"');
+    }
+    buffer.writeln('    ios:');
+    buffer.writeln('      bundleId: "$iosProdPkg"');
+    if (config.iosAppName != null) {
+      buffer.writeln('      appName: "${config.iosAppName}"');
+    }
+
+    return buffer.toString();
   }
 
   /// Reads rename YAML from [renameFileName], generates [flavorFileName],

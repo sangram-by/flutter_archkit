@@ -146,6 +146,26 @@ ios:
       expect(yaml, contains('bundleId: "com.cool.app"'));
     });
 
+    test('converts platform-specific app names into flavor.yaml with appName overrides', () {
+      const config = RenameConfig(
+        androidAppName: 'Aritra Android',
+        androidPackageName: 'com.example.aritra_android',
+        iosAppName: 'Aritra iOS',
+        iosBundleId: 'com.example.aritra_ios',
+      );
+
+      final yaml = RenameToFlavorConverter.convertToYamlString(config);
+
+      expect(yaml, contains('applicationId: "com.example.aritra_android.dev"'));
+      expect(yaml, contains('appName: "Aritra Android Dev"'));
+      expect(yaml, contains('bundleId: "com.example.aritra_ios.dev"'));
+      expect(yaml, contains('appName: "Aritra iOS Dev"'));
+      expect(yaml, contains('applicationId: "com.example.aritra_android"'));
+      expect(yaml, contains('appName: "Aritra Android"'));
+      expect(yaml, contains('bundleId: "com.example.aritra_ios"'));
+      expect(yaml, contains('appName: "Aritra iOS"'));
+    });
+
     test('convertAndSave creates flavor.yaml from rename.yaml', () async {
       final renameFile = File(p.join(tempDir.path, 'rename.yaml'));
       await renameFile.writeAsString('''
@@ -413,12 +433,14 @@ ios:
       final flavorFile = File(p.join(tempDir.path, 'flavor.yaml'));
       expect(await flavorFile.exists(), isTrue);
       final flavorContent = await flavorFile.readAsString();
-      expect(flavorContent, contains('name: "Aritra Android Dev"'));
       expect(flavorContent, contains('applicationId: "com.example.aritra_android.dev"'));
+      expect(flavorContent, contains('appName: "Aritra Android Dev"'));
       expect(flavorContent, contains('bundleId: "com.example.aritra_ios.dev"'));
-      expect(flavorContent, contains('name: "Aritra Android"'));
+      expect(flavorContent, contains('appName: "Aritra iOS Dev"'));
       expect(flavorContent, contains('applicationId: "com.example.aritra_android"'));
+      expect(flavorContent, contains('appName: "Aritra Android"'));
       expect(flavorContent, contains('bundleId: "com.example.aritra_ios"'));
+      expect(flavorContent, contains('appName: "Aritra iOS"'));
 
       // rename.yaml is deleted!
       expect(await renameFile.exists(), isFalse);

@@ -43,7 +43,7 @@ class AndroidFlavorGenerator {
         '            applicationId = "${flavor.applicationId}"',
       );
       buffer.writeln(
-        '            resValue(type = "string", name = "app_name", value = "${flavor.appName}")',
+        '            resValue(type = "string", name = "app_name", value = "${flavor.effectiveAndroidAppName}")',
       );
       buffer.writeln('        }');
     }

@@ -31,7 +31,7 @@ class IosXcconfigGenerator {
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.$podConfigName.xcconfig"
 
 FLUTTER_TARGET=lib/main.dart
-APP_NAME=${flavor.appName}
+APP_NAME=${flavor.effectiveIosAppName}
 BASE_URL=${flavor.baseUrl}
 PRODUCT_BUNDLE_IDENTIFIER=${flavor.bundleId}
 ''';

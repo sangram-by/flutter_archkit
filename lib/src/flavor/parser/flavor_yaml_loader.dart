@@ -126,10 +126,19 @@ class FlavorYamlLoader {
         );
       }
 
+      final androidAppName = (androidNode['appName'] ?? androidNode['name'])?.toString().trim();
+      final iosAppName = (iosNode['appName'] ?? iosNode['name'])?.toString().trim();
+
       result.add(
         FlavorConfig(
           name: name,
           appName: appName.trim(),
+          androidAppName: (androidAppName != null && androidAppName.isNotEmpty)
+              ? androidAppName
+              : null,
+          iosAppName: (iosAppName != null && iosAppName.isNotEmpty)
+              ? iosAppName
+              : null,
           applicationId: applicationId.trim(),
           bundleId: bundleId.trim(),
           baseUrl: baseUrl.trim(),

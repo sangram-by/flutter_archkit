@@ -1,4 +1,4 @@
-## 0.3.0
+## 0.2.2
 
 * **Package & App Name Renamer (`archkit rename` / `archkit -rn` / `dart run flutter_archkit:rename`)**:
   * Added automated cross-platform renaming for app display name and package/bundle identifier across all 6 platforms:
